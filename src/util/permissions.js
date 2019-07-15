@@ -4,7 +4,6 @@ import { store } from "../App";
 const INITIAL_PATH = "appData.users.userPermissions.data.userPermissions";
 const permission = path => {
   get(store.getState(), INITIAL_PATH + "." + path, false);
-  console.log(store.getState());
 };
 
 export const readListAudit = () =>
