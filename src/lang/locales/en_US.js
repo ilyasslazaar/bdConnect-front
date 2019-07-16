@@ -174,5 +174,20 @@ module.exports = {
 
   "Records without metadata": "Records without metadata",
   "Search for documents box having no metadata for fields":
-    "Search for documents box having no metadata for fields"
+    "Search for documents box having no metadata for fields",
+
+  /** this part is made for datalist labes */
+  "menu.data-list": "Connetions List",
+  "pages.add-new": "New Connection",
+  "pages.orderby": "Order By ",
+  "pages.add-new-connection-title": "Add New Connection",
+  "pages.host-name": "Host Name",
+  "pages.port": "Connection port",
+  "pages.connector": "Connector",
+  "pages.connection-name": "Connection Name",
+  "pages.ssl": "SSL",
+  "pages.cancel": "Cancel",
+  "pages.submit": "Save",
+  "pages.delete": "delete",
+  "pages.update": "update"
 };

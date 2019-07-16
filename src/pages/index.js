@@ -3,10 +3,9 @@ import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 
 import TopNav from "containers/TopNav";
 import Sidebar from "containers/Sidebar";
-
+import datalist from "../pages/apps/data-list/data-list";
 import { connect } from "react-redux";
 import instance from "util/instances";
-import { home } from "./apps/home";
 
 import { getUserPermissions } from "redux/actions";
 
@@ -56,8 +55,11 @@ class MainApp extends Component {
                 <Switch>
                   <PrivateRoute
                     path={`${match.url}/home`}
-                    component={home}
-                    /* hasAccess={readUsers}*/
+                    component={datalist}
+                  />
+                  <PrivateRoute
+                    path={`${match.url}/session`}
+                    component={datalist}
                   />
                   <Redirect to="/error" />
                 </Switch>

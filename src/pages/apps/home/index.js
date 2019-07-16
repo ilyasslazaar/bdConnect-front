@@ -11,7 +11,6 @@ class ReportingCmp extends Component {
     this.state = {
       data: {}
     };
-    
   }
 
   render() {

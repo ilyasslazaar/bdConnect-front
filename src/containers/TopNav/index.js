@@ -238,7 +238,7 @@ class TopNav extends Component {
         </div>
 
         <a className="navbar-logo ems-title h4 ml-auto color-theme-1" href="/">
-          Evidence Management System
+          dbConnect System
         </a>
 
         <div className="ml-auto">

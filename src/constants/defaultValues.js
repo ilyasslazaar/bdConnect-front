@@ -10,3 +10,4 @@ export const localeOptions = [
   { id: "ar", name: "Arabic" }
 ];
 export const apiUrl = "http://localhost:9000/api/";
+export const servicePath = "http://localhost:8080";
