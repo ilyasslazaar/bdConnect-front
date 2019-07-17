@@ -189,5 +189,6 @@ module.exports = {
   "pages.cancel": "Cancel",
   "pages.submit": "Save",
   "pages.delete": "delete",
-  "pages.update": "update"
+  "pages.update": "update",
+  "input-groups.host.port": "Host &Port"
 };

@@ -2,11 +2,15 @@
 import React, { Component, Fragment } from "react";
 import { injectIntl } from "react-intl";
 import { servicePath } from "../../../constants/defaultValues";
+import { CONNECTORS_ENDPOINT } from "../../../constants/defaultValues";
+import instance from "../../../util/instances";
 import {
   Row,
   Card,
   CustomInput,
   Button,
+  InputGroup,
+  InputGroupAddon,
   Modal,
   ModalHeader,
   ModalBody,
@@ -51,14 +55,20 @@ class DataListLayout extends Component {
     this.onContextMenuClick = this.onContextMenuClick.bind(this);
 
     this.state = {
+      connectionForm: {
+        host: "",
+        port: "",
+        name: "",
+        connector: "",
+        ssl: false,
+        user: "",
+        password: "",
+        currentDatabase: ""
+      },
       displayMode: "list",
       pageSizes: [10, 20, 30, 50, 100],
       selectedPageSize: 10,
-      categories: [
-        { label: "Cakes", value: "Cakes", key: 0 },
-        { label: "Cupcakes", value: "Cupcakes", key: 1 },
-        { label: "Desserts", value: "Desserts", key: 2 }
-      ],
+      connectors: [],
       orderOptions: [
         { column: "name", label: "Connection Name" },
         { column: "connector.type", label: "Connector" },
@@ -78,6 +88,8 @@ class DataListLayout extends Component {
     };
   }
   componentWillMount() {
+    this.loadConnectors();
+
     this.props.bindShortcut(["ctrl+a", "command+a"], () =>
       this.handleChangeSelectAll(false)
     );
@@ -88,6 +100,28 @@ class DataListLayout extends Component {
       return false;
     });
   }
+
+  OnInputChange = event => {
+    this.setState({
+      connectionForm: {
+        ...this.state.connectionForm,
+        [event.target.name]: event.target.value
+      }
+    });
+  };
+
+  loadConnectors = () => {
+    let result = [];
+    instance.get(CONNECTORS_ENDPOINT).then(response => {
+      response.data.map(row => {
+        result.push({ label: row.type, value: row.id, key: row.id });
+        return false;
+      });
+    });
+    this.setState({
+      connectors: result
+    });
+  };
 
   toggleModal() {
     this.setState({
@@ -186,7 +220,7 @@ class DataListLayout extends Component {
       });
     }
     document.activeElement.blur();
-    console.log(this.state);
+    //console.log(this.state);
   }
 
   getIndex(value, arr, prop) {
@@ -233,7 +267,6 @@ class DataListLayout extends Component {
         return res.data;
       })
       .then(data => {
-        console.log(data.length);
         this.setState({
           totalPage: data.totalPages,
           items: data.content,
@@ -301,42 +334,90 @@ class DataListLayout extends Component {
                       <IntlMessages id="pages.add-new-connection-title" />
                     </ModalHeader>
                     <ModalBody>
-                      <Label className="mt-4">
-                        <IntlMessages id="pages.connection-name" />
-                      </Label>
-                      <Input />
-                      <Label className="mt-4">
-                        <IntlMessages id="pages.host-name" />
-                      </Label>
-                      <Input />
-                      <Label className="mt-4">
-                        <IntlMessages id="pages.port" />
-                      </Label>
-                      <Input />
-                      <Label className="mt-4">
-                        <IntlMessages id="pages.connector" />
-                      </Label>
+                      <Input
+                        placeholder="Connection Name"
+                        id="connexion-name"
+                        name="name"
+                        value={this.state.connectionForm.name}
+                        onChange={e => this.OnInputChange(e)}
+                      />
+                      <Label className="mt-4" />
+                      <InputGroup>
+                        <InputGroupAddon addonType="prepend" />
+                        <Input
+                          placeholder="host"
+                          id="connexion-host"
+                          name="host"
+                          value={this.state.connectionForm.host}
+                          onChange={e => this.OnInputChange(e)}
+                        />
+                        <Input
+                          placeholder="database"
+                          id="connexion-currentDatabase"
+                          name="currentDatabase"
+                          value={this.state.connectionForm.currentDatabase}
+                          onChange={e => this.OnInputChange(e)}
+                        />
+                        <Input
+                          placeholder="port"
+                          id="connexion-port"
+                          name="port"
+                          value={this.state.connectionForm.port}
+                          onChange={e => this.OnInputChange(e)}
+                        />
+                      </InputGroup>
+                      <Label className="mt-4" />
+                      <InputGroup>
+                        <InputGroupAddon addonType="prepend" />
+                        <Input
+                          placeholder="username"
+                          id="connexion-user"
+                          name="user"
+                          value={this.state.connectionForm.user}
+                          onChange={e => this.OnInputChange(e)}
+                        />
+                        <Input
+                          placeholder="password"
+                          id="connexion-password"
+                          name="password"
+                          value={this.state.connectionForm.password}
+                          onChange={e => this.OnInputChange(e)}
+                        />
+                      </InputGroup>
+                      <Label className="mt-4" />
                       <Select
+                        placeholder="Select a Connector"
                         components={{ Input: CustomSelectInput }}
                         className="react-select"
                         classNamePrefix="react-select"
-                        name="form-field-name"
-                        options={this.state.categories}
+                        name="connector"
+                        id="connexion-connector"
+                        options={this.state.connectors}
+                        value={this.state.connectionForm.connector}
+                        onChange={e => {
+                          this.setState({
+                            connectionForm: {
+                              ...this.state.connectionForm,
+                              connector: e.value
+                            }
+                          });
+                        }}
                       />
-                      <Label className="mt-4">
-                        <IntlMessages id="pages.ssl" />
-                      </Label>
+                      <Label className="mt-4" />
                       <CustomInput
-                        type="radio"
-                        id="exCustomRadio"
-                        name="customRadio"
-                        label="with SSL"
-                      />
-                      <CustomInput
-                        type="radio"
-                        id="exCustomRadio2"
-                        name="customRadio"
-                        label="Without SSL"
+                        type="checkbox"
+                        id="connexion-ssl"
+                        name="ssl"
+                        label="use SSL"
+                        checked={this.state.connectionForm.ssl}
+                        onChange={e => {
+                          this.setState({
+                            connectionForm: {
+                              ...this.state.connectionForm,
+                              [e.target.name]: e.target.checked
+                            }
+                          });
+                        }}
                       />
                     </ModalBody>
                     <ModalFooter>
