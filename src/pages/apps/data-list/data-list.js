@@ -25,6 +25,7 @@ import {
   Label,
   Badge
 } from "reactstrap";
+import { AvInput, AvForm } from "availity-reactstrap-validation";
 import { NavLink } from "react-router-dom";
 import Select from "react-select";
 import CustomSelectInput from "../../../components/CustomSelectInput";
@@ -56,15 +57,17 @@ class DataListLayout extends Component {
 
     this.state = {
       connectionForm: {
-        host: "",
-        port: "",
+        connector: null,
+        currentDatabase: "",
+        hostname: "",
         name: "",
-        connector: "",
-        ssl: false,
-        user: "",
         password: "",
-        currentDatabase: ""
+        port: "",
+        queries: null,
+        ssl: false,
+        user: ""
       },
+      connector: null,
       displayMode: "list",
       pageSizes: [10, 20, 30, 50, 100],
       selectedPageSize: 10,
@@ -121,6 +124,18 @@ class DataListLayout extends Component {
     this.setState({
       connectors: result
     });
+  };
+
+  hundleNewConnexionSubmit = () => {
+    instance
+      .post(
+        servicePath + "/api/connexions?connectorId=" + this.state.connector,
+        this.state.connectionForm
+      )
+      .then(() => {
+        this.toggleModal();
+        this.dataListRender();
+      });
   };
 
   toggleModal() {
@@ -330,108 +345,124 @@ class DataListLayout extends Component {
                     wrapClassName="modal-right"
                     backdrop="static"
                   >
-                    <ModalHeader toggle={this.toggleModal}>
-                      <IntlMessages id="pages.add-new-connection-title" />
-                    </ModalHeader>
-                    <ModalBody>
-                      <Input
-                        placeholder="Connection Name"
-                        id="connexion-name"
-                        name="name"
-                        value={this.state.connectionForm.name}
-                        onChange={e => this.OnInputChange(e)}
-                      />
-                      <Label className="mt-4" />
-                      <InputGroup>
-                        <InputGroupAddon addonType="prepend" />
+                    <AvForm>
+                      <ModalHeader toggle={this.toggleModal}>
+                        <IntlMessages id="pages.add-new-connection-title" />
+                      </ModalHeader>
+                      <ModalBody>
                         <Input
-                          placeholder="host"
-                          id="connexion-host"
-                          name="host"
-                          value={this.state.connectionForm.host}
+                          placeholder="Connection Name"
+                          id="connexion-name"
+                          name="name"
+                          value={this.state.connectionForm.name}
                           onChange={e => this.OnInputChange(e)}
                         />
-                        <Input
-                          placeholder="database"
-                          id="connexion-currentDatabase"
-                          name="currentDatabase"
-                          value={this.state.connectionForm.currentDatabase}
-                          onChange={e => this.OnInputChange(e)}
-                        />
-                        <Input
-                          placeholder="port"
-                          id="connexion-port"
-                          name="port"
-                          value={this.state.connectionForm.port}
-                          onChange={e => this.OnInputChange(e)}
-                        />
-                      </InputGroup>
-                      <Label className="mt-4" />
-                      <InputGroup>
-                        <InputGroupAddon addonType="prepend" />
-                        <Input
-                          placeholder="username"
-                          id="connexion-user"
-                          name="user"
-                          value={this.state.connectionForm.user}
-                          onChange={e => this.OnInputChange(e)}
-                        />
-                        <Input
-                          placeholder="password"
-                          id="connexion-password"
-                          name="password"
-                          value={this.state.connectionForm.password}
-                          onChange={e => this.OnInputChange(e)}
-                        />
-                      </InputGroup>
-                      <Label className="mt-4" />
-                      <Select
-                        placeholder="Select a Connector"
-                        components={{ Input: CustomSelectInput }}
-                        className="react-select"
-                        classNamePrefix="react-select"
-                        name="connector"
-                        id="connexion-connector"
-                        options={this.state.connectors}
-                        value={this.state.connectionForm.connector}
-                        onChange={e => {
-                          this.setState({
-                            connectionForm: {
-                              ...this.state.connectionForm,
+                        <Label className="mt-4" />
+                        <InputGroup>
+                          <InputGroupAddon addonType="prepend" />
+                          <AvInput
+                            placeholder="host"
+                            id="connexion-host"
+                            required
+                            name="hostname"
+                            value={this.state.connectionForm.host}
+                            onChange={e => this.OnInputChange(e)}
+                          />
+                          <Input
+                            placeholder="database"
+                            id="connexion-currentDatabase"
+                            name="currentDatabase"
+                            value={this.state.connectionForm.currentDatabase}
+                            onChange={e => this.OnInputChange(e)}
+                          />
+                          <AvInput
+                            placeholder="port"
+                            id="connexion-port"
+                            name="port"
+                            validate={{
+                              pattern: {
+                                value: "^[0-9]+",
+                                errorMessage: "Port must be  4 digets "
+                              },
+                              minLength: {
+                                value: 4,
+                                errorMessage: "Port must be between 4 digets "
+                              },
+                              maxLength: {
+                                value: 4,
+                                errorMessage: "Port must be between 4 digets "
+                              }
+                            }}
+                            value={this.state.connectionForm.port}
+                            onChange={e => this.OnInputChange(e)}
+                          />
+                        </InputGroup>
+                        <Label className="mt-4" />
+                        <InputGroup>
+                          <InputGroupAddon addonType="prepend" />
+                          <AvInput
+                            placeholder="username"
+                            id="connexion-user"
+                            name="user"
+                            value={this.state.connectionForm.user}
+                            onChange={e => this.OnInputChange(e)}
+                          />
+                          <Input
+                            placeholder="password"
+                            id="connexion-password"
+                            name="password"
+                            value={this.state.connectionForm.password}
+                            onChange={e => this.OnInputChange(e)}
+                          />
+                        </InputGroup>
+                        <Label className="mt-4" />
+                        <Select
+                          placeholder="Select a Connector"
+                          components={{ Input: CustomSelectInput }}
+                          className="react-select"
+                          classNamePrefix="react-select"
+                          name="connector"
+                          id="connexion-connector"
+                          options={this.state.connectors}
+                          onChange={e => {
+                            this.setState({
                               connector: e.value
-                            }
-                          });
-                        }}
-                      />
-                      <Label className="mt-4" />
-                      <CustomInput
-                        type="checkbox"
-                        id="connexion-ssl"
-                        name="ssl"
-                        label="use SSL"
-                        checked={this.state.connectionForm.ssl}
-                        onChange={e => {
-                          this.setState({
-                            connectionForm: {
-                              ...this.state.connectionForm,
-                              [e.target.name]: e.target.checked
-                            }
-                          });
-                        }}
-                      />
-                    </ModalBody>
-                    <ModalFooter>
-                      <Button
-                        color="secondary"
-                        outline
-                        onClick={this.toggleModal}
-                      >
-                        <IntlMessages id="pages.cancel" />
-                      </Button>
-                      <Button color="primary" onClick={this.toggleModal}>
-                        <IntlMessages id="pages.submit" />
-                      </Button>{" "}
-                    </ModalFooter>
+                            });
+                          }}
+                        />
+                        <Label className="mt-4" />
+                        <CustomInput
+                          type="checkbox"
+                          id="connexion-ssl"
+                          name="ssl"
+                          label="use SSL"
+                          checked={this.state.connectionForm.ssl}
+                          onChange={e => {
+                            this.setState({
+                              connectionForm: {
+                                ...this.state.connectionForm,
+                                [e.target.name]: e.target.checked
+                              }
+                            });
+                          }}
+                        />
+                      </ModalBody>
+                      <ModalFooter>
+                        <Button
+                          color="secondary"
+                          outline
+                          onClick={this.toggleModal}
+                        >
+                          <IntlMessages id="pages.cancel" />
+                        </Button>
+                        <Button
+                          color="primary"
+                          onClick={this.hundleNewConnexionSubmit}
+                        >
+                          <IntlMessages id="pages.submit" />
+                        </Button>{" "}
+                      </ModalFooter>
+                    </AvForm>
                   </Modal>
                   <ButtonDropdown
                     isOpen={this.state.dropdownSplitOpen}
