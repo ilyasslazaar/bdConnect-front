@@ -503,7 +503,9 @@ class DataListLayout extends Component {
                       className="dropdown-toggle-split pl-2 pr-2"
                     />
                     <DropdownMenu right>
-                      <DropdownItem>
+                      <DropdownItem onClick={ ()=>{
+                        console.log("u clicked delete action");
+                      }}>
                         <IntlMessages id="pages.delete" />
                       </DropdownItem>
                       <DropdownItem>

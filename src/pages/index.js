@@ -6,6 +6,7 @@ import Sidebar from "containers/Sidebar";
 import datalist from "../pages/apps/data-list/data-list";
 import { connect } from "react-redux";
 import instance from "util/instances";
+import survey from "./apps/survey/survey";
 
 import { getUserPermissions } from "redux/actions";
 
@@ -59,7 +60,7 @@ class MainApp extends Component {
                   />
                   <PrivateRoute
                     path={`${match.url}/session`}
-                    component={datalist}
+                    component={survey}
                   />
                   <Redirect to="/error" />
                 </Switch>

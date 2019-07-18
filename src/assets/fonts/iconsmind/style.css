@@ -8,7 +8,9 @@
 	font-weight: normal;
 	font-style: normal;
 }
-
+.ql-tooltip {
+	display: none
+}
 [class^="iconsmind-"], [class*=" iconsmind-"] {
 	font-family: 'icomoon';
 	speak: none;

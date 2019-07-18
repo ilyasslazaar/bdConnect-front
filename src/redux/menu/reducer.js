@@ -3,13 +3,13 @@ import {
   MENU_CONTAINER_ADD_CLASSNAME,
   MENU_CLICK_MOBILE_MENU,
   MENU_CHANGE_DEFAULT_CLASSES
-} from "redux/actionTypes";
+} from "../../constants/actionTypes";
 
 import {
   defaultMenuType,
   subHiddenBreakpoint,
   menuHiddenBreakpoint
-} from "constants/defaultValues";
+} from "../../constants/defaultValues";
 
 const INIT_STATE = {
   containerClassnames: defaultMenuType,

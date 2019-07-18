@@ -6,3 +6,5 @@ export * from "./boxs/actions";
 export * from "./document/actions";
 export * from "./pages/actions";
 export * from "./metadata/actions";
+export * from "./surveyList/actions";
+export * from "./surveyDetail/actions";
