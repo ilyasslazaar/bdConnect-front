@@ -4,6 +4,7 @@ import { injectIntl } from "react-intl";
 import { servicePath } from "../../../constants/defaultValues";
 import { CONNECTORS_ENDPOINT } from "../../../constants/defaultValues";
 import instance from "../../../util/instances";
+import { NotificationManager } from "../../../components/ReactNotifications";
 import {
   Row,
   Card,
@@ -23,7 +24,8 @@ import {
   DropdownItem,
   Input,
   Label,
-  Badge
+  Badge,
+  Alert
 } from "reactstrap";
 import { AvInput, AvForm } from "availity-reactstrap-validation";
 import { NavLink } from "react-router-dom";
@@ -67,7 +69,8 @@ class DataListLayout extends Component {
         ssl: false,
         user: ""
       },
-      connector: null,
+      formErrors: "",
+      connector: "",
       displayMode: "list",
       pageSizes: [10, 20, 30, 50, 100],
       selectedPageSize: 10,
@@ -104,6 +107,22 @@ class DataListLayout extends Component {
     });
   }
 
+  validateConnectionForm = () => {
+    let errors = "";
+    if (isNaN(this.state.connectionForm.port)) {
+      errors += "port should be a number\n";
+    }
+    if (
+      this.state.connectionForm.port === "" ||
+      this.state.connectionForm.hostname === "" ||
+      this.state.connectionForm.name === "" ||
+      this.state.connectionForm.user === "" ||
+      this.state.connector === ""
+    ) {
+      errors += "Worng Iput make sure you enter a valid data";
+    }
+    return errors;
+  };
   OnInputChange = event => {
     this.setState({
       connectionForm: {
@@ -127,20 +146,38 @@ class DataListLayout extends Component {
   };
 
   hundleNewConnexionSubmit = () => {
-    instance
-      .post(
-        servicePath + "/api/connexions?connectorId=" + this.state.connector,
-        this.state.connectionForm
-      )
-      .then(() => {
-        this.toggleModal();
-        this.dataListRender();
-      });
+    let errors = this.validateConnectionForm();
+    if (errors === "") {
+      instance
+        .post(
+          servicePath + "/api/connexions?connectorId=" + this.state.connector,
+          this.state.connectionForm
+        )
+        .then(() => {
+          this.toggleModal();
+          this.dataListRender();
+        });
+    } else {
+      this.setState({ formErrors: errors });
+    }
   };
 
   toggleModal() {
     this.setState({
-      modalOpen: !this.state.modalOpen
+      modalOpen: !this.state.modalOpen,
+      connectionForm: {
+        connector: null,
+        currentDatabase: "",
+        hostname: "",
+        name: "",
+        password: "",
+        port: "",
+        queries: null,
+        ssl: false,
+        user: ""
+      },
+      formErrors: "",
+      connector: ""
     });
   }
   toggleDisplayOptions() {
@@ -293,11 +330,34 @@ class DataListLayout extends Component {
   }
 
   onContextMenuClick = (e, data, target) => {
-    console.log(
+    if (this.state.selectedItems.length > 0) {
+      instance.post(
+        servicePath + "/api/connexions/delete",
+        this.state.selectedItems
+      );
+      this.dataListRender();
+    } else {
+      NotificationManager.error(
+        "please select  Connection(s) to delete",
+        "ERROR: can't delete connection(s) ",
+        5000,
+        () => {
+          alert("callback");
+        },
+        null,
+        "danger"
+      );
+    }
+    /*console.log(
       "onContextMenuClick - selected items",
       this.state.selectedItems
     );
     console.log("onContextMenuClick - action : ", data.action);
+    */
+  };
+
+  OnUpdateClick = e => {
+    console.log("update  button clicked ");
   };
 
   onContextMenu = (e, data) => {
@@ -346,6 +406,9 @@ class DataListLayout extends Component {
                     backdrop="static"
                   >
                     <AvForm>
+                      {this.state.formErrors !== "" ? (
+                        <Alert color="danger">{this.state.formErrors}</Alert>
+                      ) : null}
                       <ModalHeader toggle={this.toggleModal}>
                         <IntlMessages id="pages.add-new-connection-title" />
                       </ModalHeader>
@@ -503,13 +566,12 @@ class DataListLayout extends Component {
                       className="dropdown-toggle-split pl-2 pr-2"
                     />
                     <DropdownMenu right>
-                      <DropdownItem onClick={ ()=>{
-                        console.log("u clicked delete action");
-                      }}>
+                      <DropdownItem
+                        onClick={() => {
+                          this.onContextMenuClick();
+                        }}
+                      >
                         <IntlMessages id="pages.delete" />
-                      </DropdownItem>
-                      <DropdownItem>
-                        <IntlMessages id="pages.update" />
                       </DropdownItem>
                     </DropdownMenu>
                   </ButtonDropdown>
@@ -690,11 +752,8 @@ class DataListLayout extends Component {
           id="menu_id"
           onShow={e => this.onContextMenu(e, e.detail.data)}
         >
-          <MenuItem onClick={this.onContextMenuClick} data={{ action: "copy" }}>
-            <i className="simple-icon-docs" /> <span>Copy</span>
-          </MenuItem>
-          <MenuItem onClick={this.onContextMenuClick} data={{ action: "move" }}>
-            <i className="simple-icon-drawer" /> <span>Move to archive</span>
+          <MenuItem onClick={this.OnUpdateClick} data={{ action: "update" }}>
+            <i className="simple-icon-docs" /> <span>Update</span>
           </MenuItem>
           <MenuItem
             onClick={this.onContextMenuClick}

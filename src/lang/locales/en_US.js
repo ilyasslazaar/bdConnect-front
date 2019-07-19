@@ -190,5 +190,8 @@ module.exports = {
   "pages.submit": "Save",
   "pages.delete": "delete",
   "pages.update": "update",
-  "input-groups.host.port": "Host &Port"
+  "input-groups.host.port": "Host &Port",
+
+  /** survey */
+  "survey.orderby": "databases"
 };
