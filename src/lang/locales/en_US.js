@@ -193,5 +193,7 @@ module.exports = {
   "input-groups.host.port": "Host &Port",
 
   /** survey */
-  "survey.orderby": "databases"
+  "survey.orderby": "databases",
+  queries: "Queries",
+  SQL: "SQL"
 };

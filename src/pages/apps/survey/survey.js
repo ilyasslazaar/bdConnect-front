@@ -9,10 +9,6 @@ import {
   Card,
   CardBody,
   Button,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownItem,
-  DropdownMenu,
   Collapse,
   CardTitle,
   CustomInput,
@@ -47,25 +43,32 @@ import { servicePath } from "../../../constants/defaultValues";
 const categories = ["cat1", "cat2"];
 const labels = ["labl1,labl2"];
 
-const orderColumn = ["tst", "test"];
-const orderColumns = ["1", "2"];
 const data = [
   ["column1", "column2", "column3"],
   ["column1", "column2", "column3"]
 ];
 const columns = ["column1", "column2", "column3"];
 const options = [];
+
+const queryString = require("query-string");
 class SurveyListApplication extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      connecection: {}
+      connecection: {
+        currentDatabase: ""
+      },
+      queries: null,
+      databases: []
     };
   }
 
   getMuiTheme = () =>
     createMuiTheme({
+      typography: {
+        useNextVariants: true
+      },
       overrides: {
         MUIDataTableSelectCell: {
           root: {
@@ -75,20 +78,44 @@ class SurveyListApplication extends Component {
       }
     });
 
-  componentDidMount() {
-    const queryString = require("query-string");
+  componentWillMount() {
+    this.getConnection();
+    this.getAllDatabases();
+  }
+
+  getConnection = () => {
     const connectionId = queryString.parse(this.props.location.search).id;
 
-    console.log("component mounted");
     instance
       .get(servicePath + "/api/connexions/" + connectionId)
       .then(response => {
-        console.log(response.data);
-        this.setState({ connecection: response.data });
+        if (response != null) {
+          this.setState({ connecection: response.data });
+          this.setState({ queries: response.data.queries });
+        }
       });
-  }
+  };
 
-  getConnection = () => {};
+  getAllDatabases = () => {
+    const connectionId = queryString.parse(this.props.location.search).id;
+    instance
+      .get(servicePath + "/api/databases/" + connectionId)
+      .then(response => {
+        if (response) {
+          let databases = response.data.rows.map((row, index) => {
+            return {
+              label: row.columns[0].columnValue,
+              value: row.columns[0].columnValue,
+              key: index
+            };
+          });
+          this.setState({ databases: databases });
+        }
+      })
+      .catch(e => {
+        console.log("[getAllDATABASES] " + e.message);
+      });
+  };
 
   render() {
     return (
@@ -170,7 +197,7 @@ class SurveyListApplication extends Component {
                       onChange={event => {
                         this.setState({
                           status:
-                            event.target.value == "on" ? "COMPLETED" : "ACTIVE"
+                            event.target.value === "on" ? "COMPLETED" : "ACTIVE"
                         });
                       }}
                     />
@@ -183,7 +210,7 @@ class SurveyListApplication extends Component {
                       onChange={event => {
                         this.setState({
                           status:
-                            event.target.value != "on" ? "COMPLETED" : "ACTIVE"
+                            event.target.value !== "on" ? "COMPLETED" : "ACTIVE"
                         });
                       }}
                     />
@@ -211,7 +238,6 @@ class SurveyListApplication extends Component {
                 className="pt-0 pl-0 d-inline-block d-md-none"
                 onClick={this.toggleDisplayOptions}
               >
-                <IntlMessages id="survey.display-options" />{" "}
                 <i className="simple-icon-arrow-down align-middle" />
               </Button>
 
@@ -220,24 +246,18 @@ class SurveyListApplication extends Component {
                 isOpen={this.state.displayOptionsIsOpen}
               >
                 <div className="d-block mb-2 d-md-inline-block">
-                  <UncontrolledDropdown className="mr-1 float-md-left btn-group mb-1">
-                    <DropdownToggle caret color="outline-dark" size="xs">
-                      <IntlMessages id="survey.orderby" />
-                      {orderColumn ? orderColumn.label : ""}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      {orderColumns.map((o, index) => {
-                        return (
-                          <DropdownItem
-                            key={index}
-                            onClick={() => this.changeOrderBy(o.column)}
-                          >
-                            {o.label}
-                          </DropdownItem>
-                        );
-                      })}
-                    </DropdownMenu>
-                  </UncontrolledDropdown>
+                  <Select
+                    placeholder={
+                      "Current: " + this.state.connecection.currentDatabase
+                    }
+                    onChange={e => {}}
+                    components={{ Input: CustomSelectInput }}
+                    className="react-select"
+                    classNamePrefix="react-select"
+                    name="databases"
+                    id="connexion-databases"
+                    options={this.state.databases}
+                  />
                 </div>
               </Collapse>
             </div>
@@ -252,19 +272,34 @@ class SurveyListApplication extends Component {
               </CardBody>
               <table
                 border="0"
-                Style="border-collapse:separate !important; margin-right:10px; margin-bottom:16px"
+                style={{
+                  borderCollapse: "separate !important",
+                  marginRight: "10px",
+                  marginBottom: "16px"
+                }}
               >
                 <tbody>
                   <tr>
                     <td align="right" style={{ padding: "18px" }}>
-                      <a
-                        href="#"
+                      <Button
                         title="Execute"
                         target="_blank"
-                        Style="font-size: 14px; line-height: 1.5; font-weight: 700; letter-spacing: 1px;padding: 15px 40px; text-align:center; text-decoration:none; color:#FFFFFF; border-radius: 50px; background-color:#922c88;"
+                        style={{
+                          border: 0,
+                          fontSize: "14px",
+                          lineHeight: "1.5",
+                          fontWeight: "700",
+                          letterSpacing: "1px",
+                          padding: "15px 40px",
+                          textAlign: "center",
+                          textDecoration: "none",
+                          color: "#FFFFFF",
+                          borderadius: "50px",
+                          backgroundColor: "#922c88"
+                        }}
                       >
                         Execute
-                      </a>
+                      </Button>
                     </td>
                   </tr>
                 </tbody>
@@ -287,8 +322,15 @@ class SurveyListApplication extends Component {
           >
             <div className="p-4">
               <p className="text-muted text-small">
-                <IntlMessages id="Queries" />
+                <IntlMessages id="queries" />
               </p>
+              <ul>
+                {this.state.queries !== null
+                  ? this.state.queries.map(query => {
+                      return <li key={query.id}>{query.name}</li>;
+                    })
+                  : null}
+              </ul>
             </div>
           </PerfectScrollbar>
         </ApplicationMenu>

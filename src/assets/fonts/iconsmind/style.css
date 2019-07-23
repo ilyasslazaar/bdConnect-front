@@ -14,7 +14,9 @@
 .css-10nd86i {
   margin-bottom: 13px;
 }
-
+#connexion-databases{
+  width:200px;
+}
 div[class^="MuiPaper"],
 div[class*=" MuiPaper"] {
   border-radius: 0% !important;
