@@ -37,18 +37,10 @@ import {
   selectedSurveyItemsChange
 } from "../../../redux/actions";
 
-import ReactQuill from "react-quill";
 import { servicePath } from "../../../constants/defaultValues";
 
 const categories = ["cat1", "cat2"];
 const labels = ["labl1,labl2"];
-
-const data = [
-  ["column1", "column2", "column3"],
-  ["column1", "column2", "column3"]
-];
-const columns = ["column1", "column2", "column3"];
-const options = [];
 
 const queryString = require("query-string");
 class SurveyListApplication extends Component {
@@ -56,12 +48,45 @@ class SurveyListApplication extends Component {
     super(props);
 
     this.state = {
+      queryToExecute: "",
       connecection: {
         currentDatabase: ""
       },
       queries: null,
-      databases: []
+      databases: [],
+      QueryResult: {
+        columns: [],
+        data: [],
+        options: []
+      }
     };
+  }
+
+  prepareQueryResult(response) {
+    let data = [];
+    let cols = [];
+    if (
+      response != null &&
+      response.data != null &&
+      response.data.tableName != null
+    ) {
+      cols = response.data.rows[0].columns.map(column => {
+        return column.columnName;
+      });
+
+      data = response.data.rows.map(row => {
+        return row.columns.map(value => {
+          return value.columnValue;
+        });
+      });
+    }
+    this.setState({
+      QueryResult: {
+        ...this.state.QueryResult,
+        columns: cols,
+        data: data
+      }
+    });
   }
 
   getMuiTheme = () =>
@@ -80,6 +105,7 @@ class SurveyListApplication extends Component {
 
   componentWillMount() {
     this.getConnection();
+
     this.getAllDatabases();
   }
 
@@ -91,6 +117,7 @@ class SurveyListApplication extends Component {
       .then(response => {
         if (response != null) {
           this.setState({ connecection: response.data });
+
           this.setState({ queries: response.data.queries });
         }
       });
@@ -250,7 +277,16 @@ class SurveyListApplication extends Component {
                     placeholder={
                       "Current: " + this.state.connecection.currentDatabase
                     }
-                    onChange={e => {}}
+                    onChange={e => {
+                      if (e.value !== this.state.connecection.currentDatabase) {
+                        instance.get(
+                          "/api/connexions/updateDatabase/" +
+                            this.state.connecection.id +
+                            "/" +
+                            e.value
+                        );
+                      }
+                    }}
                     components={{ Input: CustomSelectInput }}
                     className="react-select"
                     classNamePrefix="react-select"
@@ -268,7 +304,13 @@ class SurveyListApplication extends Component {
                 <CardTitle>
                   <IntlMessages id="SQL" />
                 </CardTitle>
-                <ReactQuill theme="bubble" />
+                <textarea
+                  style={{ width: "100%", height: "200px" }}
+                  value={this.state.queryToExecute}
+                  onChange={e => {
+                    this.setState({ queryToExecute: e.target.value });
+                  }}
+                />
               </CardBody>
               <table
                 border="0"
@@ -282,6 +324,16 @@ class SurveyListApplication extends Component {
                   <tr>
                     <td align="right" style={{ padding: "18px" }}>
                       <Button
+                        onClick={e => {
+                          instance
+                            .post("/api/statment", {
+                              statement: this.state.queryToExecute,
+                              connection: this.state.connecection.id + ""
+                            })
+                            .then(response => {
+                              this.prepareQueryResult(response);
+                            });
+                        }}
                         title="Execute"
                         target="_blank"
                         style={{
@@ -308,9 +360,9 @@ class SurveyListApplication extends Component {
               <MuiThemeProvider theme={this.getMuiTheme()}>
                 <MUIDataTable
                   title={"Employee List"}
-                  data={data}
-                  columns={columns}
-                  options={options}
+                  data={this.state.QueryResult.data}
+                  columns={this.state.QueryResult.columns}
+                  options={this.state.QueryResult.options}
                 />
               </MuiThemeProvider>
             </Card>
@@ -327,7 +379,28 @@ class SurveyListApplication extends Component {
               <ul>
                 {this.state.queries !== null
                   ? this.state.queries.map(query => {
-                      return <li key={query.id}>{query.name}</li>;
+                      return (
+                        // eslint-disable-next-line jsx-a11y/anchor-is-valid
+                        <a
+                          style={{ display: "block" }}
+                          href="#"
+                          onClick={e => {
+                            e.preventDefault();
+
+                            instance
+                              .get("/api/statment/" + query.id)
+                              .then(response => {
+                                this.prepareQueryResult(response);
+                              })
+                              .catch(e => {
+                                console.log(e.message);
+                              });
+                          }}
+                          key={query.id}
+                        >
+                          {query.name}
+                        </a>
+                      );
                     })
                   : null}
               </ul>
