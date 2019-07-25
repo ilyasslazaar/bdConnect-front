@@ -57,7 +57,9 @@ class SurveyListApplication extends Component {
       QueryResult: {
         columns: [],
         data: [],
-        options: []
+        options: {
+          pagination: true
+        }
       }
     };
   }
@@ -103,6 +105,16 @@ class SurveyListApplication extends Component {
       }
     });
 
+  updateQueries = (queries, currentDatabase) => {
+    const qs = [];
+    queries.filter(q => {
+      if (q.database === currentDatabase) {
+        qs.push(q);
+      }
+      return true;
+    });
+    this.setState({ queries: qs });
+  };
   componentWillMount() {
     this.getConnection();
 
@@ -117,8 +129,10 @@ class SurveyListApplication extends Component {
       .then(response => {
         if (response != null) {
           this.setState({ connecection: response.data });
-
-          this.setState({ queries: response.data.queries });
+          this.updateQueries(
+            response.data.queries,
+            response.data.currentDatabase
+          );
         }
       });
   };
@@ -279,11 +293,21 @@ class SurveyListApplication extends Component {
                     }
                     onChange={e => {
                       if (e.value !== this.state.connecection.currentDatabase) {
+                        this.setState({
+                          connecection: {
+                            ...this.state.connecection,
+                            currentDatabase: e.value
+                          }
+                        });
                         instance.get(
                           "/api/connexions/updateDatabase/" +
                             this.state.connecection.id +
                             "/" +
                             e.value
+                        );
+                        this.updateQueries(
+                          this.state.connecection.queries,
+                          e.value
                         );
                       }
                     }}
@@ -359,7 +383,7 @@ class SurveyListApplication extends Component {
 
               <MuiThemeProvider theme={this.getMuiTheme()}>
                 <MUIDataTable
-                  title={"Employee List"}
+                  title={"Result List"}
                   data={this.state.QueryResult.data}
                   columns={this.state.QueryResult.columns}
                   options={this.state.QueryResult.options}
