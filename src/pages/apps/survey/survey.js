@@ -3,6 +3,7 @@ import IntlMessages from "../../../util/IntlMessages";
 import { injectIntl } from "react-intl";
 import MUIDataTable from "mui-datatables";
 import instance from "../../../util/instances";
+import axios from "axios";
 
 import {
   Row,
@@ -19,6 +20,7 @@ import {
   ModalFooter,
   Input
 } from "reactstrap";
+import { NotificationManager } from "../../../components/ReactNotifications";
 
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import { Colxx, Separator } from "../../../components/CustomBootstrap";
@@ -48,7 +50,12 @@ class SurveyListApplication extends Component {
     super(props);
 
     this.state = {
+      disableExecute: false,
+      queryName: "",
+      modal: false,
       queryToExecute: "",
+      quereryExecuted: false,
+      quereryExecutionStatus: "",
       connecection: {
         currentDatabase: ""
       },
@@ -62,6 +69,72 @@ class SurveyListApplication extends Component {
         }
       }
     };
+  }
+
+  handleExecuteQuery = () => {
+    this.setState({ disableExecute: true });
+    axios.defaults.headers.common["Authorization"] =
+      instance.defaults.headers.common["Authorization"];
+    axios
+      .post(servicePath + "/api/statment", {
+        statement: this.state.queryToExecute,
+        connection: this.state.connecection.id + ""
+      })
+      .then(response => {
+        this.prepareQueryResult(response);
+        this.customNotification(
+          "success",
+          "Query executed successfully",
+          "Info"
+        );
+      })
+      .catch(e => {
+        this.customNotification(
+          "error",
+          "Query execution Failded",
+          "Error Execution"
+        );
+      });
+    this.setState({ quereryExecuted: true });
+    this.setState({ disableExecute: false });
+  };
+
+  saveQuery = () => {
+    if (this.state.queryToExecute !== "") {
+      this.setState({ modal: true });
+    } else {
+      this.customNotification(
+        "error",
+        "Query Stirng Shouldn't be  empty",
+        "Error"
+      );
+    }
+  };
+
+  customNotification(status, message, title) {
+    if (status === "success") {
+      NotificationManager.success(
+        message,
+        title,
+        5000,
+        () => {
+          alert("callback");
+        },
+        null,
+        null
+      );
+    } else if (status === "error") {
+      NotificationManager.error(
+        message,
+        title,
+        5000,
+        () => {
+          alert("callback");
+        },
+        null,
+        "danger"
+      );
+    }
   }
 
   prepareQueryResult(response) {
@@ -129,6 +202,7 @@ class SurveyListApplication extends Component {
       .then(response => {
         if (response != null) {
           this.setState({ connecection: response.data });
+
           this.updateQueries(
             response.data.queries,
             response.data.currentDatabase
@@ -336,6 +410,102 @@ class SurveyListApplication extends Component {
                   }}
                 />
               </CardBody>
+
+              <Modal
+                isOpen={this.state.modal}
+                toggle={e => {
+                  this.setState({ modal: false });
+                }}
+              >
+                <ModalHeader
+                  toggle={e => {
+                    this.setState({ modal: false });
+                  }}
+                >
+                  <IntlMessages id="modal.modal-title" />
+                </ModalHeader>
+                <ModalBody>
+                  <Input
+                    placeholder="Enter Query Name Here"
+                    id="query-name"
+                    name="queryname"
+                    value={this.state.queryName}
+                    onChange={e => {
+                      this.setState({ queryName: e.target.value });
+                    }}
+                  />
+                </ModalBody>
+                <ModalFooter>
+                  <Button
+                    color="primary"
+                    onClick={e => {
+                      const query = {
+                        connexion: this.state.connecection,
+                        created_at: new Date(),
+                        database: this.state.connecection.currentDatabase,
+                        executions: [],
+                        name: this.state.queryName,
+                        statment: this.state.queryToExecute,
+                        type: this.state.connecection.connector.type
+                      };
+                      if (this.state.queryToExecute === "") {
+                        this.customNotification(
+                          "error",
+                          "Query Shouldn't be an empty string",
+                          "Error"
+                        );
+                      } else if (this.state.queryName === "") {
+                        this.customNotification(
+                          "error",
+                          "Query Name Shouldn't be an empty string",
+                          "Error"
+                        );
+                      } else {
+                        axios.defaults.headers.common["Authorization"] =
+                          instance.defaults.headers.common["Authorization"];
+                        axios
+                          .post(servicePath + "/api/queries", query)
+                          .then(response => {
+                            this.customNotification(
+                              "success",
+                              "Query saved !",
+                              "Info"
+                            );
+                            const qs = this.state.queries;
+                            qs.push({
+                              id: response.data.id,
+                              type: query.type,
+                              name: query.name,
+                              statment: query.statment,
+                              created_at: query.created_at
+                            });
+                            this.setState({ queries: qs });
+                          })
+                          .catch(e => {
+                            this.customNotification(
+                              "error",
+                              "couldn't save Query",
+                              "Error"
+                            );
+                          });
+
+                        this.setState({ modal: false });
+                      }
+                    }}
+                  >
+                    Submit
+                  </Button>{" "}
+                  <Button
+                    color="secondary"
+                    onClick={e => {
+                      this.setState({ modal: false });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </ModalFooter>
+              </Modal>
+
               <table
                 border="0"
                 style={{
@@ -348,15 +518,30 @@ class SurveyListApplication extends Component {
                   <tr>
                     <td align="right" style={{ padding: "18px" }}>
                       <Button
+                        onClick={this.saveQuery}
+                        title="Execute"
+                        target="_blank"
+                        style={{
+                          border: 0,
+                          fontSize: "14px",
+                          marginRight: "2%",
+                          lineHeight: "1.5",
+                          fontWeight: "700",
+                          letterSpacing: "1px",
+                          padding: "15px 40px",
+                          textAlign: "center",
+                          textDecoration: "none",
+                          color: "#FFFFFF",
+                          borderadius: "50px",
+                          backgroundColor: "#28a745de"
+                        }}
+                      >
+                        save query
+                      </Button>
+                      <Button
+                        disabled={this.state.disableExecute}
                         onClick={e => {
-                          instance
-                            .post("/api/statment", {
-                              statement: this.state.queryToExecute,
-                              connection: this.state.connecection.id + ""
-                            })
-                            .then(response => {
-                              this.prepareQueryResult(response);
-                            });
+                          this.handleExecuteQuery();
                         }}
                         title="Execute"
                         target="_blank"
@@ -410,14 +595,23 @@ class SurveyListApplication extends Component {
                           href="#"
                           onClick={e => {
                             e.preventDefault();
-
+                            this.setState({ queryToExecute: query.statment });
                             instance
                               .get("/api/statment/" + query.id)
                               .then(response => {
                                 this.prepareQueryResult(response);
+                                this.customNotification(
+                                  "success",
+                                  "Query executed successfully",
+                                  "Info"
+                                );
                               })
                               .catch(e => {
-                                console.log(e.message);
+                                this.customNotification(
+                                  "error",
+                                  "Query execution Failded",
+                                  "Error Execution"
+                                );
                               });
                           }}
                           key={query.id}
