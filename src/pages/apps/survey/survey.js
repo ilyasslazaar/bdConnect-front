@@ -21,6 +21,7 @@ import {
   Input
 } from "reactstrap";
 import { NotificationManager } from "../../../components/ReactNotifications";
+import Pagination from "../../../components/List/Pagination";
 
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import { Colxx, Separator } from "../../../components/CustomBootstrap";
@@ -43,13 +44,17 @@ import { servicePath } from "../../../constants/defaultValues";
 
 const categories = ["cat1", "cat2"];
 const labels = ["labl1,labl2"];
-
+const apiUrl = servicePath + "/api/statment";
 const queryString = require("query-string");
 class SurveyListApplication extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      selectedPageSize: 10,
+      currentPage: 1,
+      totalPage: 1,
+      search: "",
       disableExecute: false,
       queryName: "",
       modal: false,
@@ -65,35 +70,42 @@ class SurveyListApplication extends Component {
         columns: [],
         data: [],
         options: {
-          pagination: true
+          pagination: false
         }
       }
     };
   }
 
-  handleExecuteQuery = () => {
+  handleExecuteQuery = e => {
     this.setState({ disableExecute: true });
     axios.defaults.headers.common["Authorization"] =
       instance.defaults.headers.common["Authorization"];
+    const { selectedPageSize, currentPage } = this.state;
+    const notify = e !== undefined;
     axios
-      .post(servicePath + "/api/statment", {
+      .post(apiUrl, {
         statement: this.state.queryToExecute,
-        connection: this.state.connecection.id + ""
+        connection: this.state.connecection.id + "",
+        offset: currentPage + "",
+        limit: selectedPageSize + ""
       })
       .then(response => {
         this.prepareQueryResult(response);
-        this.customNotification(
-          "success",
-          "Query executed successfully",
-          "Info"
-        );
+
+        notify &&
+          this.customNotification(
+            "success",
+            "Query executed successfully",
+            "Info"
+          );
       })
       .catch(e => {
-        this.customNotification(
-          "error",
-          "Query execution Failded",
-          "Error Execution"
-        );
+        notify &&
+          this.customNotification(
+            "error",
+            "Query execution Failded",
+            "Error Execution"
+          );
       });
     this.setState({ quereryExecuted: true });
     this.setState({ disableExecute: false });
@@ -156,6 +168,7 @@ class SurveyListApplication extends Component {
       });
     }
     this.setState({
+      totalPage: response.data.totalRecords,
       QueryResult: {
         ...this.state.QueryResult,
         columns: cols,
@@ -228,9 +241,35 @@ class SurveyListApplication extends Component {
         }
       })
       .catch(e => {
-        console.log("[getAllDATABASES] " + e.message);
+        console.log("[AllDATABASES] " + e.message);
       });
   };
+
+  onChangePage = page => {
+    this.setState(
+      {
+        currentPage: page
+      },
+      () => this.handleExecuteQuery()
+    );
+  };
+  dataListRender() {
+    const { selectedPageSize, currentPage } = this.state;
+    axios
+      .get(`${apiUrl}?pageSize=${selectedPageSize}&currentPage=${currentPage}`)
+      .then(res => {
+        return res.data;
+      })
+      .then(data => {
+        this.setState({
+          totalPage: data.totalPages,
+          items: data.content,
+          selectedItems: [],
+          totalItemCount: data.totalElements,
+          isLoading: true
+        });
+      });
+  }
 
   render() {
     return (
@@ -406,7 +445,10 @@ class SurveyListApplication extends Component {
                   style={{ width: "100%", height: "200px" }}
                   value={this.state.queryToExecute}
                   onChange={e => {
-                    this.setState({ queryToExecute: e.target.value });
+                    this.setState({
+                      queryToExecute: e.target.value,
+                      currentPage: 1
+                    });
                   }}
                 />
               </CardBody>
@@ -519,7 +561,7 @@ class SurveyListApplication extends Component {
                     <td align="right" style={{ padding: "18px" }}>
                       <Button
                         onClick={this.saveQuery}
-                        title="Execute"
+                        title="save query"
                         target="_blank"
                         style={{
                           border: 0,
@@ -541,7 +583,7 @@ class SurveyListApplication extends Component {
                       <Button
                         disabled={this.state.disableExecute}
                         onClick={e => {
-                          this.handleExecuteQuery();
+                          this.handleExecuteQuery("execute");
                         }}
                         title="Execute"
                         target="_blank"
@@ -573,6 +615,11 @@ class SurveyListApplication extends Component {
                   columns={this.state.QueryResult.columns}
                   options={this.state.QueryResult.options}
                 />
+                <Pagination
+                  currentPage={this.state.currentPage}
+                  totalPage={this.state.totalPage}
+                  onChangePage={i => this.onChangePage(i)}
+                />
               </MuiThemeProvider>
             </Card>
           </Colxx>
@@ -595,9 +642,15 @@ class SurveyListApplication extends Component {
                           href="#"
                           onClick={e => {
                             e.preventDefault();
-                            this.setState({ queryToExecute: query.statment });
+
                             instance
-                              .get("/api/statment/" + query.id)
+                              .get(
+                                "/api/statment/" +
+                                  query.id +
+                                  "?cp=1" +
+                                  "&ps=" +
+                                  this.state.totalPage
+                              )
                               .then(response => {
                                 this.prepareQueryResult(response);
                                 this.customNotification(
@@ -605,6 +658,10 @@ class SurveyListApplication extends Component {
                                   "Query executed successfully",
                                   "Info"
                                 );
+                                this.setState({
+                                  queryToExecute: query.statment,
+                                  currentPage: 1
+                                });
                               })
                               .catch(e => {
                                 this.customNotification(
