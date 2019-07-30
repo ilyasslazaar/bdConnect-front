@@ -649,7 +649,7 @@ class SurveyListApplication extends Component {
                                   query.id +
                                   "?cp=1" +
                                   "&ps=" +
-                                  this.state.totalPage
+                                  this.state.selectedPageSize
                               )
                               .then(response => {
                                 this.prepareQueryResult(response);
