@@ -6304,3 +6304,13 @@ div[class*=" MuiPaper"] {
 .iconsmind-Zootool:before {
   content: "\ee25";
 }
+
+@import "../../../../node_modules/codemirror/lib/codemirror.css";
+@import "../../../../node_modules/codemirror/theme/material.css";
+
+.app-menu {
+  z-index: 999999 !important;
+}
+.notification-container {
+  z-index: 9999999 !important;
+}

@@ -42,6 +42,9 @@ import {
 
 import { servicePath } from "../../../constants/defaultValues";
 
+import { Controlled as CodeMirror } from "react-codemirror2";
+require("codemirror/mode/sql/sql");
+
 const categories = ["cat1", "cat2"];
 const labels = ["labl1,labl2"];
 const apiUrl = servicePath + "/api/statment";
@@ -441,15 +444,17 @@ class SurveyListApplication extends Component {
                 <CardTitle>
                   <IntlMessages id="SQL" />
                 </CardTitle>
-                <textarea
-                  style={{ width: "100%", height: "200px" }}
+                <CodeMirror
                   value={this.state.queryToExecute}
-                  onChange={e => {
-                    this.setState({
-                      queryToExecute: e.target.value,
-                      currentPage: 1
-                    });
+                  options={{
+                    mode: "sql",
+                    theme: "material",
+                    lineNumbers: true
                   }}
+                  onBeforeChange={(editor, data, value) => {
+                    this.setState({ queryToExecute: value });
+                  }}
+                  onChange={(editor, data, value) => {}}
                 />
               </CardBody>
 
@@ -616,6 +621,7 @@ class SurveyListApplication extends Component {
                   options={this.state.QueryResult.options}
                 />
                 <Pagination
+                  size="sm"
                   currentPage={this.state.currentPage}
                   totalPage={this.state.totalPage}
                   onChangePage={i => this.onChangePage(i)}
