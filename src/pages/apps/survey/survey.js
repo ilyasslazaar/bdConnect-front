@@ -110,8 +110,7 @@ class SurveyListApplication extends Component {
             "Error Execution"
           );
       });
-    this.setState({ quereryExecuted: true });
-    this.setState({ disableExecute: false });
+    this.setState({ quereryExecuted: true, disableExecute: false });
   };
 
   saveQuery = () => {
@@ -454,7 +453,9 @@ class SurveyListApplication extends Component {
                   onBeforeChange={(editor, data, value) => {
                     this.setState({ queryToExecute: value });
                   }}
-                  onChange={(editor, data, value) => {}}
+                  onChange={(editor, data, value) => {
+                    this.setState({ currentPage: 1 });
+                  }}
                 />
               </CardBody>
 
