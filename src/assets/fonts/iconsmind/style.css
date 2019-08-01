@@ -6305,9 +6305,6 @@ div[class*=" MuiPaper"] {
   content: "\ee25";
 }
 
-@import "../../../../node_modules/codemirror/lib/codemirror.css";
-@import "../../../../node_modules/codemirror/theme/material.css";
-
 .app-menu {
   z-index: 999999 !important;
 }

@@ -41,9 +41,12 @@ import {
 } from "../../../redux/actions";
 
 import { servicePath } from "../../../constants/defaultValues";
-
-import { Controlled as CodeMirror } from "react-codemirror2";
-require("codemirror/mode/sql/sql");
+import AceEditor from "react-ace";
+import "react-ace-builds/webpack-resolver-min";
+import "brace/mode/mysql";
+import "brace/theme/monokai";
+import "brace/ext/language_tools";
+import "brace/snippets/mysql";
 
 const categories = ["cat1", "cat2"];
 const labels = ["labl1,labl2"];
@@ -54,6 +57,7 @@ class SurveyListApplication extends Component {
     super(props);
 
     this.state = {
+      tableName: "Result List",
       selectedPageSize: 10,
       currentPage: 1,
       totalPage: 1,
@@ -170,6 +174,10 @@ class SurveyListApplication extends Component {
       });
     }
     this.setState({
+      tableName:
+        response.data.tableName !== undefined
+          ? response.data.tableName
+          : "Results List",
       totalPage: response.data.totalRecords,
       QueryResult: {
         ...this.state.QueryResult,
@@ -207,6 +215,7 @@ class SurveyListApplication extends Component {
     this.getConnection();
 
     this.getAllDatabases();
+    console.log("component did mount");
   }
 
   getConnection = () => {
@@ -443,18 +452,29 @@ class SurveyListApplication extends Component {
                 <CardTitle>
                   <IntlMessages id="SQL" />
                 </CardTitle>
-                <CodeMirror
+
+                <AceEditor
+                  placeholder="Write your Query here "
+                  mode="mysql"
+                  theme="monokai"
+                  height="200px"
+                  width="100%"
+                  name="blah2"
+                  onLoad={this.onLoad}
+                  onChange={value => {
+                    this.setState({ currentPage: 1, queryToExecute: value });
+                  }}
+                  fontSize={14}
+                  showPrintMargin={true}
+                  showGutter={true}
+                  highlightActiveLine={true}
                   value={this.state.queryToExecute}
-                  options={{
-                    mode: "sql",
-                    theme: "material",
-                    lineNumbers: true
-                  }}
-                  onBeforeChange={(editor, data, value) => {
-                    this.setState({ queryToExecute: value });
-                  }}
-                  onChange={(editor, data, value) => {
-                    this.setState({ currentPage: 1 });
+                  setOptions={{
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true,
+                    enableSnippets: false,
+                    showLineNumbers: true,
+                    tabSize: 2
                   }}
                 />
               </CardBody>
@@ -616,7 +636,7 @@ class SurveyListApplication extends Component {
 
               <MuiThemeProvider theme={this.getMuiTheme()}>
                 <MUIDataTable
-                  title={"Result List"}
+                  title={this.state.tableName}
                   data={this.state.QueryResult.data}
                   columns={this.state.QueryResult.columns}
                   options={this.state.QueryResult.options}
