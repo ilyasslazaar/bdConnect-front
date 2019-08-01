@@ -215,7 +215,6 @@ class SurveyListApplication extends Component {
     this.getConnection();
 
     this.getAllDatabases();
-    console.log("component did mount");
   }
 
   getConnection = () => {
@@ -454,6 +453,9 @@ class SurveyListApplication extends Component {
                 </CardTitle>
 
                 <AceEditor
+                  editorProps={{
+                    $blockScrolling: Infinity
+                  }}
                   placeholder="Write your Query here "
                   mode="mysql"
                   theme="monokai"
