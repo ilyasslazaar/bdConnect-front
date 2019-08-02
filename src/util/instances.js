@@ -1,6 +1,7 @@
 import axios from "axios";
+import { servicePath } from "../constants/defaultValues";
 const instance = axios.create({
-  baseURL: "http://127.0.0.1:8080/",
+  baseURL: servicePath,
   timeout: 150000
 });
 instance.defaults.headers.common["Authorization"] =
