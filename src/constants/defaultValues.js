@@ -10,6 +10,6 @@ export const localeOptions = [
   { id: "ar", name: "Arabic" }
 ];
 
-export const servicePath = "http://localhost:3789";
+export const servicePath = "http://localhost:8080";
 export const apiUrl = servicePath + "api/";
 export const CONNECTORS_ENDPOINT = servicePath + "/api/connectors";

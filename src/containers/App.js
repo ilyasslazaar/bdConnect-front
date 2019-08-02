@@ -13,7 +13,7 @@ import "assets/style/vendor/bootstrap.min.css";
 import "react-perfect-scrollbar/dist/css/styles.css";
 import "assets/fonts/simple-line-icons/css/simple-line-icons.css";
 import "assets/fonts/iconsmind/style.css";
-import "assets/style/gogo/themes/gogo.light.green.scss";
+import "assets/style/gogo/themes/gogo.light.purple.scss";
 import "assets/style/App.scss";
 import { NotificationContainer } from "components/ReactNotifications";
 /*
