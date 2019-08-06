@@ -181,6 +181,7 @@ module.exports = {
   "pages.add-new": "New Connection",
   "pages.orderby": "Order By ",
   "pages.add-new-connection-title": "Add New Connection",
+  "pages.update-connection-title": "Update Connection",
   "pages.host-name": "Host Name",
   "pages.port": "Connection port",
   "pages.connector": "Connector",

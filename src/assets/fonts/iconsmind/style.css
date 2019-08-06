@@ -24,6 +24,13 @@ div[class*=" MuiPaper"] {
   overflow-y: scroll !important;
   overflow-y: hidden !important;
 }
+div[class^="MuiTablePagination-input"],
+div[class*="MuiTablePagination-input"] {
+  display: none !important;
+}
+td:hover{
+  cursor:  pointer !important;
+}
 .ql-tooltip {
   display: none;
 }

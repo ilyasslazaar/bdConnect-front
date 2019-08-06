@@ -71,7 +71,7 @@ class SurveyListApplication extends Component {
       connecection: {
         currentDatabase: ""
       },
-      queries: null,
+      queries: [],
       databases: [],
       QueryResult: {
         columns: [],
@@ -82,6 +82,36 @@ class SurveyListApplication extends Component {
       }
     };
   }
+
+  handleQueryClick = queryToExecute => {
+    this.setState({ disableExecute: true });
+    axios.defaults.headers.common["Authorization"] =
+      instance.defaults.headers.common["Authorization"];
+    axios
+      .post(apiUrl, {
+        statement: queryToExecute,
+        connection: this.state.connecection.id + "",
+        offset: "1",
+        limit: "10"
+      })
+      .then(response => {
+        this.prepareQueryResult(response);
+
+        this.customNotification(
+          "success",
+          "Query executed successfully",
+          "Info"
+        );
+      })
+      .catch(e => {
+        this.customNotification(
+          "error",
+          "Query execution Failded",
+          "Error Execution"
+        );
+      });
+    this.setState({ quereryExecuted: true, disableExecute: false });
+  };
 
   handleExecuteQuery = e => {
     this.setState({ disableExecute: true });
@@ -606,7 +636,7 @@ class SurveyListApplication extends Component {
                           backgroundColor: "#28a745de"
                         }}
                       >
-                        save query
+                        Save Query
                       </Button>
                       <Button
                         disabled={this.state.disableExecute}
@@ -657,58 +687,44 @@ class SurveyListApplication extends Component {
           <PerfectScrollbar
             option={{ suppressScrollX: true, wheelPropagation: false }}
           >
-            <div className="p-4">
-              <p className="text-muted text-small">
-                <IntlMessages id="queries" />
-              </p>
-              <ul>
-                {this.state.queries !== null
-                  ? this.state.queries.map(query => {
-                      return (
-                        // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                        <a
-                          style={{ display: "block" }}
-                          href="#"
-                          onClick={e => {
-                            e.preventDefault();
-
-                            instance
-                              .get(
-                                "/api/statment/" +
-                                  query.id +
-                                  "?cp=1" +
-                                  "&ps=" +
-                                  this.state.selectedPageSize
-                              )
-                              .then(response => {
-                                this.prepareQueryResult(response);
-                                this.customNotification(
-                                  "success",
-                                  "Query executed successfully",
-                                  "Info"
-                                );
-                                this.setState({
-                                  queryToExecute: query.statment,
-                                  currentPage: 1
-                                });
-                              })
-                              .catch(e => {
-                                this.customNotification(
-                                  "error",
-                                  "Query execution Failded",
-                                  "Error Execution"
-                                );
-                              });
-                          }}
-                          key={query.id}
-                        >
-                          {query.name}
-                        </a>
-                      );
-                    })
-                  : null}
-              </ul>
-            </div>
+            <MuiThemeProvider theme={this.getMuiTheme()}>
+              <MUIDataTable
+                className="QuerrieMuiDatatable"
+                data={this.state.queries.map(q => {
+                  return [q.name];
+                })}
+                title={"Queries list"}
+                columns={["Check All Queries"]}
+                options={{
+                  filter: false,
+                  sort: false,
+                  search: false,
+                  print: false,
+                  viewColumns: false,
+                  download: false,
+                  rowsPerPage: 5,
+                  selectableRowsOnClick: true,
+                  textLabels: {
+                    pagination: {
+                      rowsPerPage: ""
+                    }
+                  },
+                  onCellClick: e => {
+                    const qrs = [];
+                    this.state.queries.map(q => {
+                      qrs[q.name] = q.statment;
+                      return true;
+                    });
+                    this.setState({
+                      queryToExecute: qrs[e],
+                      currentPage: 1
+                    });
+                    console.log(this.state.queryToExecute);
+                    this.handleQueryClick(qrs[e]);
+                  }
+                }}
+              />
+            </MuiThemeProvider>
           </PerfectScrollbar>
         </ApplicationMenu>
       </Fragment>

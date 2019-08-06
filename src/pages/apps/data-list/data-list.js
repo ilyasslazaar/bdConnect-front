@@ -41,6 +41,10 @@ import mouseTrap from "react-mousetrap";
 import axios from "axios";
 
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
+
 function collect(props) {
   return { data: props.data };
 }
@@ -58,6 +62,8 @@ class DataListLayout extends Component {
     this.onContextMenuClick = this.onContextMenuClick.bind(this);
 
     this.state = {
+      togleTitle: true,
+      connectionToUpdate: null,
       connectionForm: {
         connector: null,
         currentDatabase: "",
@@ -135,10 +141,12 @@ class DataListLayout extends Component {
   loadConnectors = () => {
     let result = [];
     instance.get(CONNECTORS_ENDPOINT).then(response => {
-      response.data.map(row => {
-        result.push({ label: row.type, value: row.id, key: row.id });
-        return false;
-      });
+      if (response != null && response.data != null) {
+        response.data.map(row => {
+          result.push({ label: row.type, value: row.id, key: row.id });
+          return false;
+        });
+      }
     });
     this.setState({
       connectors: result
@@ -147,11 +155,25 @@ class DataListLayout extends Component {
 
   hundleNewConnexionSubmit = () => {
     let errors = this.validateConnectionForm();
-    if (errors === "") {
+    if (errors === "" && this.state.togleTitle) {
       instance
         .post(
           servicePath + "/api/connexions?connectorId=" + this.state.connector,
           this.state.connectionForm
+        )
+        .then(() => {
+          this.toggleModal();
+          this.dataListRender();
+        });
+    } else if (!this.state.togleTitle) {
+      const updateForm = {
+        ...this.state.connectionForm,
+        id: this.state.connectionToUpdate + ""
+      };
+      instance
+        .put(
+          servicePath + "/api/connexions/" + this.state.connector,
+          updateForm
         )
         .then(() => {
           this.toggleModal();
@@ -165,6 +187,7 @@ class DataListLayout extends Component {
   toggleModal() {
     this.setState({
       modalOpen: !this.state.modalOpen,
+      togleTitle: true,
       connectionForm: {
         connector: null,
         currentDatabase: "",
@@ -331,11 +354,28 @@ class DataListLayout extends Component {
 
   onContextMenuClick = (e, data, target) => {
     if (this.state.selectedItems.length > 0) {
-      instance.post(
-        servicePath + "/api/connexions/delete",
-        this.state.selectedItems
-      );
-      this.dataListRender();
+      confirmAlert({
+        message: "Are you sure you want to delete this connection ",
+        buttons: [
+          {
+            label: "Yes",
+            onClick: () => {
+              instance
+                .post(
+                  servicePath + "/api/connexions/delete",
+                  this.state.selectedItems
+                )
+                .then(() => {
+                  this.dataListRender();
+                });
+            }
+          },
+          {
+            label: "No",
+            onClick: () => {}
+          }
+        ]
+      });
     } else {
       NotificationManager.error(
         "please select  Connection(s) to delete",
@@ -348,16 +388,44 @@ class DataListLayout extends Component {
         "danger"
       );
     }
-    /*console.log(
-      "onContextMenuClick - selected items",
-      this.state.selectedItems
-    );
-    console.log("onContextMenuClick - action : ", data.action);
-    */
   };
 
   OnUpdateClick = e => {
-    console.log("update  button clicked ");
+    const selectedConnectionId = this.state.selectedItems[
+      this.state.selectedItems.length - 1
+    ];
+    instance
+      .get(servicePath + "/api/connexions/" + selectedConnectionId)
+      .then(response => {
+        this.setState({
+          togleTitle: false,
+          connectionToUpdate: response.data.id,
+          connector: response.data.connector.id,
+          modalOpen: true,
+          connectionForm: {
+            ...this.state.connectionForm,
+            currentDatabase: response.data.currentDatabase,
+            hostname: response.data.hostname,
+            name: response.data.name,
+            password: response.data.password,
+            port: response.data.port,
+            queries: response.data.queries,
+            ssl: response.data.ssl,
+            user: response.data.user
+          }
+        });
+      });
+
+    if (this.state.selectedItems.length > 1) {
+      NotificationManager.warning(
+        "Can't update  multiple connections last one is selected !",
+        "update Warning",
+        3000,
+        null,
+        null,
+        ""
+      );
+    }
   };
 
   onContextMenu = (e, data) => {
@@ -410,7 +478,13 @@ class DataListLayout extends Component {
                         <Alert color="danger">{this.state.formErrors}</Alert>
                       ) : null}
                       <ModalHeader toggle={this.toggleModal}>
-                        <IntlMessages id="pages.add-new-connection-title" />
+                        <IntlMessages
+                          id={
+                            this.state.togleTitle
+                              ? "pages.add-new-connection-title"
+                              : "pages.update-connection-title"
+                          }
+                        />
                       </ModalHeader>
                       <ModalBody>
                         <Input
