@@ -1,9 +1,26 @@
 import { get } from "lodash";
 import { store } from "../App";
 
-const INITIAL_PATH = "appData.users.userPermissions.data.userPermissions";
+const INITIAL_PATH = "appData.users.userPermissions.data";
 const permission = path => {
   get(store.getState(), INITIAL_PATH + "." + path, false);
+};
+
+export const loadingRoles = () => {
+  const authorities = store.getState().appData.users.userPermissions.data
+    .authorities;
+  return authorities === undefined;
+};
+
+export const adminRole = () => {
+  const authorities = store.getState().appData.users.userPermissions.data
+    .authorities;
+  return authorities !== undefined && authorities.includes("ROLE_ADMIN");
+};
+export const userRole = () => {
+  const authorities = store.getState().appData.users.userPermissions.data
+    .authorities;
+  return authorities !== undefined && authorities.includes("ROLE_USER");
 };
 
 export const readListAudit = () =>

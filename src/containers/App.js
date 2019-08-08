@@ -2,7 +2,8 @@ import React, { Component, Fragment } from "react";
 import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { IntlProvider } from "react-intl";
-import { defaultStartPath } from "constants/defaultValues";
+import { defaultAdminStartPath } from "constants/defaultValues";
+import { adminRole, userRole } from "../util/permissions";
 
 import AppLocale from "lang";
 import MainRoute from "pages";
@@ -16,6 +17,7 @@ import "assets/fonts/iconsmind/style.css";
 import "assets/style/gogo/themes/gogo.light.purple.scss";
 import "assets/style/App.scss";
 import { NotificationContainer } from "components/ReactNotifications";
+import { defaultUserStartPath } from "../constants/defaultValues";
 /*
 color options : 
 	 'light.purple'		'dark.purple'
@@ -25,23 +27,25 @@ color options :
 	 'light.red'		'dark.red'
 */
 
-const InitialPath = ({ component: Component, authUser, ...rest }) => (
-  <Route
-    render={props =>
-      !authUser ? (
-        <Component {...props} />
-      ) : (
-        <Redirect
-          to={{
-            pathname: "/login",
-            state: { from: props.location }
-          }}
-        />
-      )
-    }
-    {...rest}
-  />
-);
+const InitialPath = ({ component: Component, authUser, ...rest }) => {
+  return (
+    <Route
+      render={props =>
+        authUser ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/login",
+              state: { from: props.location }
+            }}
+          />
+        )
+      }
+      {...rest}
+    />
+  );
+};
 
 class App extends Component {
   render() {
@@ -52,7 +56,13 @@ class App extends Component {
       location.pathname === "/app" ||
       location.pathname === "/app/"
     ) {
-      return <Redirect to={defaultStartPath} />;
+      let path = "/login";
+      if (adminRole()) {
+        path = defaultAdminStartPath;
+      } else if (userRole()) {
+        path = defaultUserStartPath;
+      }
+      return <Redirect to={path} />;
     }
     return (
       <Fragment>
@@ -79,9 +89,10 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = ({ settings }) => {
+const mapStateToProps = ({ settings, appData }) => {
+  const user = appData.users.userPermissions.data;
   const { locale } = settings;
-  return { locale };
+  return { locale, user };
 };
 
 export default connect(mapStateToProps)(App);

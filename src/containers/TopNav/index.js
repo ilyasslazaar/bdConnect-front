@@ -14,12 +14,12 @@ import {
   clickOnMobileMenu,
   changeLocale
 } from "redux/actions";
+import { injectIntl } from "react-intl";
 import cs from "classnames";
 
 import { menuHiddenBreakpoint, localeOptions } from "constants/defaultValues";
 import { logoutApi } from "redux/users/apis";
-import { injectIntl } from "react-intl";
-import { getAutoCompleteDocs } from "redux/document/apis";
+
 import { logger } from "util/Logger";
 
 class TopNav extends Component {
@@ -107,10 +107,6 @@ class TopNav extends Component {
 
   onLoadDocsOptions = async searchValue => {
     try {
-      if (searchValue !== "") {
-        const response = await getAutoCompleteDocs(searchValue);
-        this.setState({ docsSearch: response.data || [] });
-      }
       this.setState({ searchValue });
     } catch (error) {
       logger("error getting Users", error);
@@ -283,8 +279,7 @@ export default injectIntl(
     {
       setContainerClassnames,
       clickOnMobileMenu,
-      changeLocale,
-      getAutoCompleteDocs
+      changeLocale
     }
   )(TopNav)
 );

@@ -2,7 +2,8 @@ export const subHiddenBreakpoint = 1800;
 export const menuHiddenBreakpoint = 768;
 export const listPageSizes = [10, 20, 30, 50, 100];
 export const defaultMenuType = "menu-default"; //'menu-sub-hidden', 'menu-hidden'
-export const defaultStartPath = "/app/home";
+export const defaultAdminStartPath = "/app/home";
+export const defaultUserStartPath = "/app/test";
 
 export const defaultLocale = "en";
 export const localeOptions = [
