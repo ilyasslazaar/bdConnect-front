@@ -3,6 +3,7 @@ import IntlMessages from "../../../util/IntlMessages";
 import { injectIntl } from "react-intl";
 import MUIDataTable from "mui-datatables";
 import instance from "../../../util/instances";
+import { adminRole } from "../../../util/permissions";
 import axios from "axios";
 
 import {
@@ -18,6 +19,7 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  CardSubtitle,
   Input
 } from "reactstrap";
 import { NotificationManager } from "../../../components/ReactNotifications";
@@ -57,6 +59,7 @@ class SurveyListApplication extends Component {
     super(props);
 
     this.state = {
+      collapse: false,
       tableName: "Result List",
       selectedPageSize: 10,
       currentPage: 1,
@@ -83,6 +86,10 @@ class SurveyListApplication extends Component {
     };
   }
 
+  toggle = () => {
+    this.setState({ collapse: !this.state.collapse });
+  };
+
   handleQueryClick = queryToExecute => {
     this.setState({ disableExecute: true });
     axios.defaults.headers.common["Authorization"] =
@@ -106,7 +113,7 @@ class SurveyListApplication extends Component {
       .catch(e => {
         this.customNotification(
           "error",
-          "Query execution Failded",
+          "Query execution Failded :" + e.response.data.message,
           "Error Execution"
         );
       });
@@ -140,7 +147,7 @@ class SurveyListApplication extends Component {
         notify &&
           this.customNotification(
             "error",
-            "Query execution Failded",
+            "Query execution Failded : " + e.response.data.message,
             "Error Execution"
           );
       });
@@ -425,247 +432,260 @@ class SurveyListApplication extends Component {
               </div>
             </div>
 
-            <div className="mb-2">
-              <Button
-                color="empty"
-                id="displayOptions"
-                className="pt-0 pl-0 d-inline-block d-md-none"
-                onClick={this.toggleDisplayOptions}
-              >
-                <i className="simple-icon-arrow-down align-middle" />
-              </Button>
-
-              <Collapse
-                className="d-md-block"
-                isOpen={this.state.displayOptionsIsOpen}
-              >
-                <div className="d-block mb-2 d-md-inline-block">
-                  <Select
-                    placeholder={
-                      "Current: " + this.state.connecection.currentDatabase
-                    }
-                    onChange={e => {
-                      if (e.value !== this.state.connecection.currentDatabase) {
-                        this.setState({
-                          connecection: {
-                            ...this.state.connecection,
-                            currentDatabase: e.value
-                          }
-                        });
-                        instance.get(
-                          "/api/connexions/updateDatabase/" +
-                            this.state.connecection.id +
-                            "/" +
-                            e.value
-                        );
-                        this.updateQueries(
-                          this.state.connecection.queries,
-                          e.value
-                        );
-                      }
-                    }}
-                    components={{ Input: CustomSelectInput }}
-                    className="react-select"
-                    classNamePrefix="react-select"
-                    name="databases"
-                    id="connexion-databases"
-                    options={this.state.databases}
-                  />
-                </div>
-              </Collapse>
-            </div>
+            <div className="mb-2" />
 
             <Separator className="mb-5" />
             <Card>
               <CardBody>
                 <CardTitle>
                   <IntlMessages id="SQL" />
+                  <div>
+                    {adminRole() && (
+                      <div className="d-block mb-2 d-md-inline-block">
+                        <Select
+                          placeholder={
+                            "Current: " +
+                            this.state.connecection.currentDatabase
+                          }
+                          onChange={e => {
+                            if (
+                              e.value !==
+                              this.state.connecection.currentDatabase
+                            ) {
+                              this.setState({
+                                connecection: {
+                                  ...this.state.connecection,
+                                  currentDatabase: e.value
+                                }
+                              });
+                              instance.get(
+                                "/api/connexions/updateDatabase/" +
+                                  this.state.connecection.id +
+                                  "/" +
+                                  e.value
+                              );
+                              this.updateQueries(
+                                this.state.connecection.queries,
+                                e.value
+                              );
+                            }
+                          }}
+                          components={{ Input: CustomSelectInput }}
+                          className="react-select"
+                          classNamePrefix="react-select"
+                          name="databases"
+                          id="connexion-databases"
+                          options={this.state.databases}
+                        />
+                      </div>
+                    )}
+                    <div style={{ float: "right" }}>
+                      <Button
+                        color="primary"
+                        onClick={this.toggle}
+                        className="mb-1"
+                        style={{ margin: " 0px 5px" }}
+                      >
+                        <IntlMessages id="collapse.toggle" />
+                      </Button>
+                      {adminRole() && (
+                        <div style={{ display: "inline" }}>
+                          <Button
+                            onClick={this.saveQuery}
+                            title="save query"
+                            target="_blank"
+                            style={{ margin: " 0px 5px" }}
+                          >
+                            Save Query
+                          </Button>
+                          <Button
+                            disabled={this.state.disableExecute}
+                            onClick={e => {
+                              this.handleExecuteQuery("execute");
+                            }}
+                            title="Execute"
+                            target="_blank"
+                            style={{ margin: " 0px 5px" }}
+                          >
+                            Execute
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardTitle>
 
-                <AceEditor
-                  editorProps={{
-                    $blockScrolling: Infinity
-                  }}
-                  placeholder="Write your Query here "
-                  mode="mysql"
-                  theme="monokai"
-                  height="200px"
-                  width="100%"
-                  name="blah2"
-                  onLoad={this.onLoad}
-                  onChange={value => {
-                    this.setState({ currentPage: 1, queryToExecute: value });
-                  }}
-                  fontSize={14}
-                  showPrintMargin={true}
-                  showGutter={true}
-                  highlightActiveLine={true}
-                  value={this.state.queryToExecute}
-                  setOptions={{
-                    enableBasicAutocompletion: true,
-                    enableLiveAutocompletion: true,
-                    enableSnippets: false,
-                    showLineNumbers: true,
-                    tabSize: 2
-                  }}
-                />
-              </CardBody>
-
-              <Modal
-                isOpen={this.state.modal}
-                toggle={e => {
-                  this.setState({ modal: false });
-                }}
-              >
-                <ModalHeader
+                {!this.state.collapse && (
+                  <AceEditor
+                    editorProps={{
+                      $blockScrolling: Infinity
+                    }}
+                    placeholder="Write your Query here "
+                    mode="mysql"
+                    theme="monokai"
+                    height="100px"
+                    width="100%"
+                    name="blah2"
+                    onLoad={this.onLoad}
+                    onChange={value => {
+                      this.setState({
+                        currentPage: 1,
+                        queryToExecute: value
+                      });
+                    }}
+                    fontSize={14}
+                    showPrintMargin={true}
+                    showGutter={true}
+                    highlightActiveLine={true}
+                    value={this.state.queryToExecute}
+                    setOptions={{
+                      enableBasicAutocompletion: true,
+                      enableLiveAutocompletion: true,
+                      enableSnippets: false,
+                      showLineNumbers: true,
+                      tabSize: 2
+                    }}
+                  />
+                )}
+                <Collapse isOpen={this.state.collapse}>
+                  <div className="p-4 border mt-4">
+                    <MuiThemeProvider theme={this.getMuiTheme()}>
+                      <MUIDataTable
+                        className="QuerrieMuiDatatable"
+                        data={this.state.queries.map(q => {
+                          return [q.name];
+                        })}
+                        title={"Queries list"}
+                        columns={["Check All Queries"]}
+                        options={{
+                          filter: false,
+                          sort: false,
+                          search: false,
+                          print: false,
+                          viewColumns: false,
+                          download: false,
+                          rowsPerPage: 5,
+                          selectableRowsOnClick: true,
+                          textLabels: {
+                            pagination: {
+                              rowsPerPage: ""
+                            }
+                          },
+                          onCellClick: e => {
+                            const qrs = [];
+                            this.state.queries.map(q => {
+                              qrs[q.name] = q.statment;
+                              return true;
+                            });
+                            this.setState({
+                              queryToExecute: qrs[e],
+                              currentPage: 1
+                            });
+                            this.toggle();
+                            this.handleQueryClick(qrs[e]);
+                          }
+                        }}
+                      />
+                    </MuiThemeProvider>
+                  </div>
+                </Collapse>
+              </CardBody>{" "}
+              {adminRole() && (
+                <Modal
+                  isOpen={this.state.modal}
                   toggle={e => {
                     this.setState({ modal: false });
                   }}
                 >
-                  <IntlMessages id="modal.modal-title" />
-                </ModalHeader>
-                <ModalBody>
-                  <Input
-                    placeholder="Enter Query Name Here"
-                    id="query-name"
-                    name="queryname"
-                    value={this.state.queryName}
-                    onChange={e => {
-                      this.setState({ queryName: e.target.value });
-                    }}
-                  />
-                </ModalBody>
-                <ModalFooter>
-                  <Button
-                    color="primary"
-                    onClick={e => {
-                      const query = {
-                        connexion: this.state.connecection,
-                        created_at: new Date(),
-                        database: this.state.connecection.currentDatabase,
-                        executions: [],
-                        name: this.state.queryName,
-                        statment: this.state.queryToExecute,
-                        type: this.state.connecection.connector.type
-                      };
-                      if (this.state.queryToExecute === "") {
-                        this.customNotification(
-                          "error",
-                          "Query Shouldn't be an empty string",
-                          "Error"
-                        );
-                      } else if (this.state.queryName === "") {
-                        this.customNotification(
-                          "error",
-                          "Query Name Shouldn't be an empty string",
-                          "Error"
-                        );
-                      } else {
-                        axios.defaults.headers.common["Authorization"] =
-                          instance.defaults.headers.common["Authorization"];
-                        axios
-                          .post(servicePath + "/api/queries", query)
-                          .then(response => {
-                            this.customNotification(
-                              "success",
-                              "Query saved !",
-                              "Info"
-                            );
-                            const qs = this.state.queries;
-                            qs.push({
-                              id: response.data.id,
-                              type: query.type,
-                              name: query.name,
-                              statment: query.statment,
-                              created_at: query.created_at
-                            });
-                            this.setState({ queries: qs });
-                          })
-                          .catch(e => {
-                            this.customNotification(
-                              "error",
-                              "couldn't save Query",
-                              "Error"
-                            );
-                          });
-
-                        this.setState({ modal: false });
-                      }
-                    }}
-                  >
-                    Submit
-                  </Button>{" "}
-                  <Button
-                    color="secondary"
-                    onClick={e => {
+                  <ModalHeader
+                    toggle={e => {
                       this.setState({ modal: false });
                     }}
                   >
-                    Cancel
-                  </Button>
-                </ModalFooter>
-              </Modal>
+                    <IntlMessages id="modal.modal-title" />
+                  </ModalHeader>
+                  <ModalBody>
+                    <Input
+                      placeholder="Enter Query Name Here"
+                      id="query-name"
+                      name="queryname"
+                      value={this.state.queryName}
+                      onChange={e => {
+                        this.setState({ queryName: e.target.value });
+                      }}
+                    />
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button
+                      color="primary"
+                      onClick={e => {
+                        const query = {
+                          connexion: this.state.connecection,
+                          created_at: new Date(),
+                          database: this.state.connecection.currentDatabase,
+                          executions: [],
+                          name: this.state.queryName,
+                          statment: this.state.queryToExecute,
+                          type: this.state.connecection.connector.type
+                        };
+                        if (this.state.queryToExecute === "") {
+                          this.customNotification(
+                            "error",
+                            "Query Shouldn't be an empty string",
+                            "Error"
+                          );
+                        } else if (this.state.queryName === "") {
+                          this.customNotification(
+                            "error",
+                            "Query Name Shouldn't be an empty string",
+                            "Error"
+                          );
+                        } else {
+                          axios.defaults.headers.common["Authorization"] =
+                            instance.defaults.headers.common["Authorization"];
+                          axios
+                            .post(servicePath + "/api/queries", query)
+                            .then(response => {
+                              this.customNotification(
+                                "success",
+                                "Query saved !",
+                                "Info"
+                              );
+                              const qs = this.state.queries;
+                              qs.push({
+                                id: response.data.id,
+                                type: query.type,
+                                name: query.name,
+                                statment: query.statment,
+                                created_at: query.created_at
+                              });
+                              this.setState({ queries: qs });
+                            })
+                            .catch(e => {
+                              this.customNotification(
+                                "error",
+                                "couldn't save Query",
+                                "Error"
+                              );
+                            });
 
-              <table
-                border="0"
-                style={{
-                  borderCollapse: "separate !important",
-                  marginRight: "10px",
-                  marginBottom: "16px"
-                }}
-              >
-                <tbody>
-                  <tr>
-                    <td align="right" style={{ padding: "18px" }}>
-                      <Button
-                        onClick={this.saveQuery}
-                        title="save query"
-                        target="_blank"
-                        style={{
-                          border: 0,
-                          fontSize: "14px",
-                          marginRight: "2%",
-                          lineHeight: "1.5",
-                          fontWeight: "700",
-                          letterSpacing: "1px",
-                          padding: "15px 40px",
-                          textAlign: "center",
-                          textDecoration: "none",
-                          color: "#FFFFFF",
-                          borderadius: "50px",
-                          backgroundColor: "#28a745de"
-                        }}
-                      >
-                        Save Query
-                      </Button>
-                      <Button
-                        disabled={this.state.disableExecute}
-                        onClick={e => {
-                          this.handleExecuteQuery("execute");
-                        }}
-                        title="Execute"
-                        target="_blank"
-                        style={{
-                          border: 0,
-                          fontSize: "14px",
-                          lineHeight: "1.5",
-                          fontWeight: "700",
-                          letterSpacing: "1px",
-                          padding: "15px 40px",
-                          textAlign: "center",
-                          textDecoration: "none",
-                          color: "#FFFFFF",
-                          borderadius: "50px",
-                          backgroundColor: "#922c88"
-                        }}
-                      >
-                        Execute
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-
+                          this.setState({ modal: false });
+                        }
+                      }}
+                    >
+                      Submit
+                    </Button>{" "}
+                    <Button
+                      color="secondary"
+                      onClick={e => {
+                        this.setState({ modal: false });
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </ModalFooter>
+                </Modal>
+              )}
               <MuiThemeProvider theme={this.getMuiTheme()}>
                 <MUIDataTable
                   title={this.state.tableName}
@@ -683,50 +703,6 @@ class SurveyListApplication extends Component {
             </Card>
           </Colxx>
         </Row>
-        <ApplicationMenu>
-          <PerfectScrollbar
-            option={{ suppressScrollX: true, wheelPropagation: false }}
-          >
-            <MuiThemeProvider theme={this.getMuiTheme()}>
-              <MUIDataTable
-                className="QuerrieMuiDatatable"
-                data={this.state.queries.map(q => {
-                  return [q.name];
-                })}
-                title={"Queries list"}
-                columns={["Check All Queries"]}
-                options={{
-                  filter: false,
-                  sort: false,
-                  search: false,
-                  print: false,
-                  viewColumns: false,
-                  download: false,
-                  rowsPerPage: 5,
-                  selectableRowsOnClick: true,
-                  textLabels: {
-                    pagination: {
-                      rowsPerPage: ""
-                    }
-                  },
-                  onCellClick: e => {
-                    const qrs = [];
-                    this.state.queries.map(q => {
-                      qrs[q.name] = q.statment;
-                      return true;
-                    });
-                    this.setState({
-                      queryToExecute: qrs[e],
-                      currentPage: 1
-                    });
-                    console.log(this.state.queryToExecute);
-                    this.handleQueryClick(qrs[e]);
-                  }
-                }}
-              />
-            </MuiThemeProvider>
-          </PerfectScrollbar>
-        </ApplicationMenu>
       </Fragment>
     );
   }

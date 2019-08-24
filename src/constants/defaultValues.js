@@ -14,3 +14,4 @@ export const localeOptions = [
 export const servicePath = "http://localhost:8080";
 export const apiUrl = servicePath + "api/";
 export const CONNECTORS_ENDPOINT = servicePath + "/api/connectors";
+export const ALL_USERS_ENDPOINT = servicePath + "/api/users";

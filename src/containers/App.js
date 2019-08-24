@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import { Redirect, Route, Switch } from "react-router-dom";
 import { IntlProvider } from "react-intl";
 import { defaultAdminStartPath } from "constants/defaultValues";
-import { adminRole, userRole } from "../util/permissions";
 
 import AppLocale from "lang";
 import MainRoute from "pages";
@@ -17,7 +16,7 @@ import "assets/fonts/iconsmind/style.css";
 import "assets/style/gogo/themes/gogo.light.purple.scss";
 import "assets/style/App.scss";
 import { NotificationContainer } from "components/ReactNotifications";
-import { defaultUserStartPath } from "../constants/defaultValues";
+/*import { defaultUserStartPath } from "../constants/defaultValues";*/
 /*
 color options : 
 	 'light.purple'		'dark.purple'
@@ -56,13 +55,13 @@ class App extends Component {
       location.pathname === "/app" ||
       location.pathname === "/app/"
     ) {
-      let path = "/login";
+      /* let path = "/login";
       if (adminRole()) {
         path = defaultAdminStartPath;
       } else if (userRole()) {
         path = defaultUserStartPath;
-      }
-      return <Redirect to={path} />;
+      }*/
+      return <Redirect to={defaultAdminStartPath} />;
     }
     return (
       <Fragment>

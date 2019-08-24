@@ -2,9 +2,13 @@
 import React, { Component, Fragment } from "react";
 import { injectIntl } from "react-intl";
 import { servicePath } from "../../../constants/defaultValues";
-import { CONNECTORS_ENDPOINT } from "../../../constants/defaultValues";
+import {
+  CONNECTORS_ENDPOINT,
+  ALL_USERS_ENDPOINT
+} from "../../../constants/defaultValues";
 import instance from "../../../util/instances";
 import { NotificationManager } from "../../../components/ReactNotifications";
+import { adminRole } from "../../../util/permissions";
 import {
   Row,
   Card,
@@ -33,7 +37,7 @@ import Select from "react-select";
 import CustomSelectInput from "../../../components/CustomSelectInput";
 import classnames from "classnames";
 
-import IntlMessages from "./../../../util/IntlMessages";
+import IntlMessages from "../../../util/IntlMessages";
 import { Colxx, Separator } from "../../../components/CustomBootstrap";
 
 import Pagination from "../../../components/List/Pagination";
@@ -49,8 +53,6 @@ function collect(props) {
   return { data: props.data };
 }
 
-const apiUrl = servicePath + "/api/currentUserConnections";
-
 class DataListLayout extends Component {
   constructor(props) {
     super(props);
@@ -62,7 +64,9 @@ class DataListLayout extends Component {
     this.onContextMenuClick = this.onContextMenuClick.bind(this);
 
     this.state = {
+      users: [],
       togleTitle: true,
+      selectedUser: "",
       connectionToUpdate: null,
       connectionForm: {
         connector: null,
@@ -101,6 +105,7 @@ class DataListLayout extends Component {
   }
   componentWillMount() {
     this.loadConnectors();
+    adminRole() && this.loadUsers();
 
     this.props.bindShortcut(["ctrl+a", "command+a"], () =>
       this.handleChangeSelectAll(false)
@@ -153,12 +158,35 @@ class DataListLayout extends Component {
     });
   };
 
+  loadUsers = () => {
+    let result = [];
+    instance.get(ALL_USERS_ENDPOINT).then(response => {
+      if (response != null && response.data != null) {
+        response.data.map(row => {
+          result.push({
+            label: row.firstName + " " + row.lastName,
+            value: row.id,
+            key: row.id
+          });
+          return false;
+        });
+      }
+      this.setState({
+        users: result
+      });
+    });
+  };
+
   hundleNewConnexionSubmit = () => {
     let errors = this.validateConnectionForm();
     if (errors === "" && this.state.togleTitle) {
       instance
         .post(
-          servicePath + "/api/connexions?connectorId=" + this.state.connector,
+          servicePath +
+            "/api/connexions/" +
+            this.state.selectedUser +
+            "/" +
+            this.state.connector,
           this.state.connectionForm
         )
         .then(() => {
@@ -324,8 +352,10 @@ class DataListLayout extends Component {
   componentDidMount() {
     this.dataListRender();
   }
-
   dataListRender() {
+    const url = adminRole()
+      ? "/api/currentUserConnections/1"
+      : "/api/currentUserConnections/2";
     const {
       selectedPageSize,
       currentPage,
@@ -334,7 +364,8 @@ class DataListLayout extends Component {
     } = this.state;
     axios
       .get(
-        `${apiUrl}?pageSize=${selectedPageSize}&currentPage=${currentPage}&orderBy=${
+        `${servicePath +
+          url}?pageSize=${selectedPageSize}&currentPage=${currentPage}&orderBy=${
           selectedOrderOption.column
         }&search=${search}`
       )
@@ -457,14 +488,16 @@ class DataListLayout extends Component {
                 </h1>
 
                 <div className="float-sm-right">
-                  <Button
-                    color="primary"
-                    size="lg"
-                    className="top-right-button"
-                    onClick={this.toggleModal}
-                  >
-                    <IntlMessages id="pages.add-new" />
-                  </Button>
+                  {adminRole() && (
+                    <Button
+                      color="primary"
+                      size="lg"
+                      className="top-right-button"
+                      onClick={this.toggleModal}
+                    >
+                      <IntlMessages id="pages.add-new" />
+                    </Button>
+                  )}
                   {"  "}
 
                   <Modal
@@ -564,6 +597,20 @@ class DataListLayout extends Component {
                           onChange={e => {
                             this.setState({
                               connector: e.value
+                            });
+                          }}
+                        />
+                        <Select
+                          placeholder="Select a user"
+                          components={{ Input: CustomSelectInput }}
+                          className="react-select"
+                          classNamePrefix="react-select"
+                          name="user"
+                          id="connexion-user"
+                          options={this.state.users}
+                          onChange={e => {
+                            this.setState({
+                              selectedUser: e.value
                             });
                           }}
                         />
@@ -768,7 +815,7 @@ class DataListLayout extends Component {
                       <div className="pl-2 d-flex flex-grow-1 min-width-zero">
                         <div className="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
                           <NavLink
-                            to={`session?id=${connection.id}`}
+                            to={`queryList?id=${connection.id}`}
                             className="w-40 w-sm-100"
                           >
                             <p className="list-item-heading mb-1 truncate">
@@ -826,9 +873,11 @@ class DataListLayout extends Component {
           id="menu_id"
           onShow={e => this.onContextMenu(e, e.detail.data)}
         >
-          <MenuItem onClick={this.OnUpdateClick} data={{ action: "update" }}>
-            <i className="simple-icon-docs" /> <span>Update</span>
-          </MenuItem>
+          {adminRole() && (
+            <MenuItem onClick={this.OnUpdateClick} data={{ action: "update" }}>
+              <i className="simple-icon-docs" /> <span>Update</span>
+            </MenuItem>
+          )}
           <MenuItem
             onClick={this.onContextMenuClick}
             data={{ action: "delete" }}

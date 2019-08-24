@@ -3,15 +3,16 @@ import { Route, withRouter, Switch, Redirect } from "react-router-dom";
 
 import TopNav from "containers/TopNav";
 import Sidebar from "containers/Sidebar";
-import datalist from "../pages/apps/data-list/data-list";
+import Connections from "../pages/apps/Connections/Connections";
 import { connect } from "react-redux";
 import instance from "util/instances";
-import survey from "./apps/survey/survey";
-import { home } from "./apps/UserDashBoard";
+import Query from "./apps/Queries/Query";
+import QueriesList from "./apps/Queries/QueriesList";
+/*import { home } from "./apps/UserDashBoard";*/
 import { adminRole, userRole, loadingRoles } from "../util/permissions";
 import {
-  defaultAdminStartPath,
-  defaultUserStartPath
+  defaultAdminStartPath
+  /*defaultUserStartPath*/
 } from "../constants/defaultValues";
 
 import { getUserPermissions } from "redux/actions";
@@ -27,7 +28,7 @@ const PrivateRoute = ({ hasAccess, component: Component, ...rest }) => (
       ) : adminRole() ? (
         <Redirect to={defaultAdminStartPath} />
       ) : userRole() ? (
-        <Redirect to={defaultUserStartPath} />
+        <Redirect to={defaultAdminStartPath} />
       ) : (
         <Redirect to="/login" />
       )
@@ -68,18 +69,18 @@ class MainApp extends Component {
                 <Switch>
                   <PrivateRoute
                     path={`${match.url}/home`}
-                    component={datalist}
-                    hasAccess={adminRole}
+                    component={Connections}
+                    hasAccess={() => userRole() || adminRole()}
                   />
                   <PrivateRoute
                     path={`${match.url}/session`}
-                    component={survey}
-                    hasAccess={adminRole}
+                    component={Query}
+                    hasAccess={() => userRole() || adminRole()}
                   />
                   <PrivateRoute
-                    path={`${match.url}/test`}
-                    component={home}
-                    hasAccess={userRole}
+                    path={`${match.url}/queryList`}
+                    component={QueriesList}
+                    hasAccess={() => userRole() || adminRole()}
                   />
                   <Redirect to="/error" />
                 </Switch>

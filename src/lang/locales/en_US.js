@@ -196,5 +196,10 @@ module.exports = {
   /** survey */
   "survey.orderby": "databases",
   queries: "Queries",
-  SQL: "SQL"
+  SQL: "SQL",
+
+  /** queryList  */
+  "pages.add-new-query-title": "Add new Query",
+  "menu.query-list": "Queries List",
+  "collapse.toggle": "Show Queries"
 };
