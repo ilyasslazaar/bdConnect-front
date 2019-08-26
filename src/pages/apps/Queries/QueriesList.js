@@ -5,13 +5,12 @@ import { servicePath } from "../../../constants/defaultValues";
 import instance from "../../../util/instances";
 import { NotificationManager } from "../../../components/ReactNotifications";
 import { adminRole } from "../../../util/permissions";
+import AceEditor from "react-ace";
 import {
   Row,
   Card,
   CustomInput,
   Button,
-  InputGroup,
-  InputGroupAddon,
   Modal,
   ModalHeader,
   ModalBody,
@@ -27,10 +26,9 @@ import {
   Badge,
   Alert
 } from "reactstrap";
-import { AvInput, AvForm } from "availity-reactstrap-validation";
+import { AvForm } from "availity-reactstrap-validation";
 import { NavLink } from "react-router-dom";
-import Select from "react-select";
-import CustomSelectInput from "../../../components/CustomSelectInput";
+
 import classnames from "classnames";
 
 import IntlMessages from "../../../util/IntlMessages";
@@ -59,31 +57,23 @@ class QueryList extends Component {
     this.onContextMenuClick = this.onContextMenuClick.bind(this);
 
     this.state = {
-      users: [],
+      query: {
+        type: "",
+        name: "",
+        statment: "",
+        created_at: new Date(),
+        database: "",
+        connexion: null,
+        executions: []
+      },
       togleTitle: true,
       selectedUser: "",
-      connectionToUpdate: null,
-      connectionForm: {
-        connector: null,
-        currentDatabase: "",
-        hostname: "",
-        name: "",
-        password: "",
-        port: "",
-        queries: null,
-        ssl: false,
-        user: ""
-      },
-      formErrors: "",
-      connector: "",
       displayMode: "list",
       pageSizes: [10, 20, 30, 50, 100],
       selectedPageSize: 10,
-      connectors: [],
       orderOptions: [
-        { column: "name", label: "Connection Name" },
-        { column: "connector.type", label: "Connector" },
-        { column: "ssl", label: "connection type" }
+        { column: "name", label: "Query Name" },
+        { column: "ssl", label: "query type" }
       ],
       selectedOrderOption: { column: "name", label: "Connection Name" },
       dropdownSplitOpen: false,
@@ -174,19 +164,7 @@ class QueryList extends Component {
     this.setState({
       modalOpen: !this.state.modalOpen,
       togleTitle: true,
-      connectionForm: {
-        connector: null,
-        currentDatabase: "",
-        hostname: "",
-        name: "",
-        password: "",
-        port: "",
-        queries: null,
-        ssl: false,
-        user: ""
-      },
-      formErrors: "",
-      connector: ""
+      formErrors: ""
     });
   }
   toggleDisplayOptions() {
@@ -309,7 +287,26 @@ class QueryList extends Component {
   }
   componentDidMount() {
     this.dataListRender();
+    this.loadConnection();
   }
+
+  loadConnection = () => {
+    const connectionId = queryString.parse(this.props.location.search).id;
+
+    instance
+      .get(servicePath + "/api/connexions/" + connectionId)
+      .then(response => {
+        this.setState({
+          query: {
+            ...this.state.query,
+            connexion: response.data,
+            type: response.data.connector.type,
+            database: response.data.currentDatabase
+          }
+        });
+      });
+  };
+
   dataListRender() {
     const connectionId = queryString.parse(this.props.location.search).id;
     const url = "/api/connections/" + connectionId + "/queries";
@@ -329,8 +326,6 @@ class QueryList extends Component {
       )
       .then(response => {
         if (response != null) {
-          this.setState({ connecection: response.data });
-
           this.setState({
             totalPage: response.data.totalPages,
             items: response.data.content,
@@ -348,14 +343,14 @@ class QueryList extends Component {
       this.state.selectedItems.length > 0
     ) {
       confirmAlert({
-        message: "Are you sure you want to delete this connection ",
+        message: "Are you sure you want to delete this query ",
         buttons: [
           {
             label: "Yes",
             onClick: () => {
               instance
                 .post(
-                  servicePath + "/api/connexions/delete",
+                  servicePath + "/api/queries/delete",
                   this.state.selectedItems
                 )
                 .then(() => {
@@ -421,6 +416,32 @@ class QueryList extends Component {
     }
   };
 
+  customNotification(status, message, title) {
+    if (status === "success") {
+      NotificationManager.success(
+        message,
+        title,
+        5000,
+        () => {
+          alert("callback");
+        },
+        null,
+        null
+      );
+    } else if (status === "error") {
+      NotificationManager.error(
+        message,
+        title,
+        5000,
+        () => {
+          alert("callback");
+        },
+        null,
+        "danger"
+      );
+    }
+  }
+
   onContextMenu = (e, data) => {
     const clickedProductId = data.data;
     if (!this.state.selectedItems.includes(clickedProductId)) {
@@ -450,6 +471,18 @@ class QueryList extends Component {
                 </h1>
 
                 <div className="float-sm-right">
+                  {adminRole() && (
+                    <Button
+                      color="primary"
+                      size="lg"
+                      className="top-right-button"
+                      onClick={this.toggleModal}
+                    >
+                      <IntlMessages id="Query.add-new" />
+                    </Button>
+                  )}
+                  {"  "}
+
                   <Modal
                     isOpen={this.state.modalOpen}
                     toggle={this.toggleModal}
@@ -465,113 +498,51 @@ class QueryList extends Component {
                       </ModalHeader>
                       <ModalBody>
                         <Input
-                          placeholder="Connection Name"
-                          id="connexion-name"
+                          placeholder="Query  Name"
+                          id="query-name"
                           name="name"
-                          value={this.state.connectionForm.name}
-                          onChange={e => this.OnInputChange(e)}
-                        />
-                        <Label className="mt-4" />
-                        <InputGroup>
-                          <InputGroupAddon addonType="prepend" />
-                          <AvInput
-                            placeholder="host"
-                            id="connexion-host"
-                            required
-                            name="hostname"
-                            value={this.state.connectionForm.host}
-                            onChange={e => this.OnInputChange(e)}
-                          />
-                          <Input
-                            placeholder="database"
-                            id="connexion-currentDatabase"
-                            name="currentDatabase"
-                            value={this.state.connectionForm.currentDatabase}
-                            onChange={e => this.OnInputChange(e)}
-                          />
-                          <AvInput
-                            placeholder="port"
-                            id="connexion-port"
-                            name="port"
-                            validate={{
-                              pattern: {
-                                value: "^[0-9]+",
-                                errorMessage: "Port must be  4 digets "
-                              },
-                              minLength: {
-                                value: 4,
-                                errorMessage: "Port must be between 4 digets "
-                              },
-                              maxLength: {
-                                value: 4,
-                                errorMessage: "Port must be between 4 digets "
+                          value={this.state.query.name}
+                          onChange={e => {
+                            console.log(this.state.query.name);
+                            this.setState({
+                              query: {
+                                ...this.state.query,
+                                name: e.target.value
                               }
-                            }}
-                            value={this.state.connectionForm.port}
-                            onChange={e => this.OnInputChange(e)}
-                          />
-                        </InputGroup>
-                        <Label className="mt-4" />
-                        <InputGroup>
-                          <InputGroupAddon addonType="prepend" />
-                          <AvInput
-                            placeholder="username"
-                            id="connexion-user"
-                            name="user"
-                            value={this.state.connectionForm.user}
-                            onChange={e => this.OnInputChange(e)}
-                          />
-                          <Input
-                            placeholder="password"
-                            id="connexion-password"
-                            name="password"
-                            value={this.state.connectionForm.password}
-                            onChange={e => this.OnInputChange(e)}
-                          />
-                        </InputGroup>
-                        <Label className="mt-4" />
-                        <Select
-                          placeholder="Select a Connector"
-                          components={{ Input: CustomSelectInput }}
-                          className="react-select"
-                          classNamePrefix="react-select"
-                          name="connector"
-                          id="connexion-connector"
-                          options={this.state.connectors}
-                          onChange={e => {
-                            this.setState({
-                              connector: e.value
-                            });
-                          }}
-                        />
-                        <Select
-                          placeholder="Select a user"
-                          components={{ Input: CustomSelectInput }}
-                          className="react-select"
-                          classNamePrefix="react-select"
-                          name="user"
-                          id="connexion-user"
-                          options={this.state.users}
-                          onChange={e => {
-                            this.setState({
-                              selectedUser: e.value
                             });
                           }}
                         />
                         <Label className="mt-4" />
-                        <CustomInput
-                          type="checkbox"
-                          id="connexion-ssl"
-                          name="ssl"
-                          label="use SSL"
-                          checked={this.state.connectionForm.ssl}
-                          onChange={e => {
+                        <AceEditor
+                          editorProps={{
+                            $blockScrolling: Infinity
+                          }}
+                          mode="mysql"
+                          theme="monokai"
+                          height="100px"
+                          width="98%"
+                          name="blah2"
+                          onLoad={this.onLoad}
+                          onChange={value => {
                             this.setState({
-                              connectionForm: {
-                                ...this.state.connectionForm,
-                                [e.target.name]: e.target.checked
+                              query: {
+                                ...this.state.query,
+                                statment: value
                               }
                             });
+                          }}
+                          placeholder="type your query"
+                          fontSize={14}
+                          showPrintMargin={true}
+                          showGutter={true}
+                          highlightActiveLine={true}
+                          value={this.state.query.statment}
+                          setOptions={{
+                            enableBasicAutocompletion: true,
+                            enableLiveAutocompletion: true,
+                            enableSnippets: false,
+                            showLineNumbers: true,
+                            tabSize: 2
                           }}
                         />
                       </ModalBody>
@@ -585,7 +556,37 @@ class QueryList extends Component {
                         </Button>
                         <Button
                           color="primary"
-                          onClick={this.hundleNewConnexionSubmit}
+                          onClick={e => {
+                            if (
+                              this.state.query.name !== "" &&
+                              this.state.query.statment !== ""
+                            ) {
+                              instance
+                                .post(
+                                  servicePath + "/api/queries",
+                                  this.state.query
+                                )
+                                .then(response => {
+                                  const queries = this.state.items;
+                                  queries.push(response.data);
+                                  this.setState({
+                                    items: queries
+                                  });
+                                });
+                              this.toggleModal();
+                              this.customNotification(
+                                "success",
+                                "Query Added successfully",
+                                "Info"
+                              );
+                            } else {
+                              this.customNotification(
+                                "error",
+                                "Error :Query name and/or Statment shouldn't be empty",
+                                "Info"
+                              );
+                            }
+                          }}
                         >
                           <IntlMessages id="pages.submit" />
                         </Button>{" "}
@@ -713,9 +714,7 @@ class QueryList extends Component {
                     </div>
                   </div>
                   <div className="float-md-right">
-                    <span className="text-muted text-small mr-1">{`${startIndex}-${endIndex} of ${
-                      this.state.totalItemCount
-                    } `}</span>
+                    <span className="text-muted text-small mr-1">{`${startIndex}-${endIndex} of ${this.state.totalItemCount} `}</span>
                     <UncontrolledDropdown className="d-inline-block">
                       <DropdownToggle caret color="outline-dark" size="xs">
                         {this.state.selectedPageSize}
@@ -816,16 +815,13 @@ class QueryList extends Component {
           onShow={e => this.onContextMenu(e, e.detail.data)}
         >
           {adminRole() && (
-            <MenuItem onClick={this.OnUpdateClick} data={{ action: "update" }}>
-              <i className="simple-icon-docs" /> <span>Update</span>
+            <MenuItem
+              onClick={this.onContextMenuClick}
+              data={{ action: "delete" }}
+            >
+              <i className="simple-icon-trash" /> <span>Delete</span>
             </MenuItem>
           )}
-          <MenuItem
-            onClick={this.onContextMenuClick}
-            data={{ action: "delete" }}
-          >
-            <i className="simple-icon-trash" /> <span>Delete</span>
-          </MenuItem>
         </ContextMenu>
       </Fragment>
     );

@@ -65,7 +65,7 @@ class SurveyListApplication extends Component {
       connection: {
         currentDatabase: ""
       },
-      InputDisabled: false,
+      InputDisabled: true,
       query: {
         statment: ""
       },
@@ -284,27 +284,46 @@ class SurveyListApplication extends Component {
         <Row className="app-row survey-app">
           <Colxx xxs="12">
             <Card>
-              <div className="mb-3">
-                <Input
-                  value={this.state.queryNameToUpdate}
-                  onChange={e => {
-                    this.setState({
-                      queryNameToUpdate: e.target.value
-                    });
-                  }}
-                  onClick={e => {
-                    this.setState({ InputDisabled: false });
-                  }}
-                  disabled={this.state.InputDisabled}
-                />
-                <Button
-                  color="secondary"
-                  style={{ borderRadius: "0px !important" }}
-                >
-                  <i className="glyph-icon simple-icon-pencil" />
-                </Button>
-              </div>
-
+              {adminRole() && (
+                <InputGroup style={{ margin: "5px 0 5px 0" }}>
+                  <Input
+                    style={
+                      this.state.InputDisabled
+                        ? {
+                            marginLeft: "5px",
+                            background: "white",
+                            border: "none"
+                          }
+                        : { marginLeft: "5px", background: "white" }
+                    }
+                    value={this.state.queryNameToUpdate}
+                    onChange={e => {
+                      this.setState({
+                        queryNameToUpdate: e.target.value
+                      });
+                    }}
+                    disabled={this.state.InputDisabled}
+                  />
+                  <InputGroupAddon addonType="append">
+                    <Button
+                      onClick={e => {
+                        this.setState({
+                          InputDisabled: !this.state.InputDisabled
+                        });
+                      }}
+                      outline
+                      color="secondary"
+                      style={{ marginRight: "5px", borderRadius: "0px" }}
+                    >
+                      {this.state.InputDisabled ? (
+                        <i className="glyph-icon simple-icon-pencil " />
+                      ) : (
+                        <i className="glyph-icon simple-icon-close " />
+                      )}
+                    </Button>
+                  </InputGroupAddon>
+                </InputGroup>
+              )}
               {adminRole() && (
                 <AceEditor
                   editorProps={{

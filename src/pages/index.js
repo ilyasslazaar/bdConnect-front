@@ -8,6 +8,7 @@ import { connect } from "react-redux";
 import instance from "util/instances";
 import Query from "./apps/Queries/Query";
 import QueriesList from "./apps/Queries/QueriesList";
+import users from "./apps/users";
 /*import { home } from "./apps/UserDashBoard";*/
 import { adminRole, userRole, loadingRoles } from "../util/permissions";
 import {
@@ -81,6 +82,11 @@ class MainApp extends Component {
                     path={`${match.url}/queryList`}
                     component={QueriesList}
                     hasAccess={() => userRole() || adminRole()}
+                  />
+                  <PrivateRoute
+                    path={`${match.url}/users`}
+                    component={users}
+                    hasAccess={() => adminRole()}
                   />
                   <Redirect to="/error" />
                 </Switch>

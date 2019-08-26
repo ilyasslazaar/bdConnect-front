@@ -271,9 +271,7 @@ class Sidebar extends Component {
             >
               <Nav vertical className="list-unstyled">
                 {menuData.map((item, index) => {
-                  return !this.hasAccess(item) ? (
-                    ""
-                  ) : (
+                  return !this.props.authorities.includes(item.role) ? null : (
                     <NavItem
                       key={index}
                       className={classnames({
@@ -334,18 +332,22 @@ class Sidebar extends Component {
   }
 }
 
-const mapStateToProps = ({ menu }) => {
+const mapStateToProps = ({ menu, appData }) => {
   const {
     containerClassnames,
     subHiddenBreakpoint,
     menuHiddenBreakpoint,
     menuClickCount
   } = menu;
+  const users = { appData };
+  const authorities = users.appData.users.userPermissions.data.authorities;
   return {
     containerClassnames,
     subHiddenBreakpoint,
     menuHiddenBreakpoint,
-    menuClickCount
+    menuClickCount,
+    users,
+    authorities
   };
 };
 export default withRouter(

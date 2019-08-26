@@ -201,5 +201,6 @@ module.exports = {
   /** queryList  */
   "pages.add-new-query-title": "Add new Query",
   "menu.query-list": "Queries List",
-  "collapse.toggle": "Show Queries"
+  "collapse.toggle": "Show Queries",
+  "Query.add-new": "Add new Query"
 };
