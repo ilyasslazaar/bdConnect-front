@@ -5,7 +5,6 @@ import MUIDataTable from "mui-datatables";
 import instance from "../../../util/instances";
 import { adminRole } from "../../../util/permissions";
 import axios from "axios";
-
 import {
   Row,
   Card,
@@ -24,7 +23,6 @@ import {
 } from "reactstrap";
 import { NotificationManager } from "../../../components/ReactNotifications";
 import Pagination from "../../../components/List/Pagination";
-
 import { createMuiTheme, MuiThemeProvider } from "@material-ui/core/styles";
 import { Colxx, Separator } from "../../../components/CustomBootstrap";
 import CustomSelectInput from "../../../components/CustomSelectInput";
@@ -32,7 +30,6 @@ import ApplicationMenu from "../../../components/ApplicationMenu";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { connect } from "react-redux";
 import Select from "react-select";
-
 import {
   getSurveyList,
   getSurveyListWithFilter,
@@ -41,7 +38,6 @@ import {
   addSurveyItem,
   selectedSurveyItemsChange
 } from "../../../redux/actions";
-
 import { servicePath } from "../../../constants/defaultValues";
 import AceEditor from "react-ace";
 import "react-ace-builds/webpack-resolver-min";

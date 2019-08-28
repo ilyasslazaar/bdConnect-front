@@ -8,7 +8,7 @@ export const defaultUserStartPath = "/app/test";
 export const defaultLocale = "en";
 export const localeOptions = [
   { id: "en", name: "English" },
-  { id: "ar", name: "Arabic" }
+  { id: "fr", name: "French"},
 ];
 
 export const servicePath = "http://localhost:8080";

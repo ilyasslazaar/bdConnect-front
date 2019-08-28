@@ -13,61 +13,60 @@ module.exports = {
   "general.copyright": "Gogo React © 2018 All Rights Reserved.",
 
   /* 02.User Login, Logout, Register */
-  "user.login-intro": "Please enter your credentials",
-  "user.username": "Username",
-  "user.password": "Password",
-  "user.login-button": "LOGIN",
-  "user.error-gettings-users": "Error getting users",
+  "user.login-intro": "S'il vous plait veuillez entrer vos coordonnées",
+  "user.username": "Utilisateur",
+  "user.password": "Mot de passe",
+  "user.login-button": "S'identifier",
+  "user.error-gettings-users": "Erreur à propos de l'utilisateur",
 
   /* 03.Menu */
-  "menu.app": "الصفحة الرئيسية",
-  "menu.users": "المستخدمين",
-  "menu.documents": "مستندات",
-  "menu.search": "بحث",
-  "menu.audit": "تدقيق",
-  "menu.restrictions": "قيود",
-  "menu.reporting": "التقارير",
+  "menu.app": "Acceuil",
+  "menu.users": "Utilisateurs",
+  "menu.documents": "Documents",
+  "menu.search": "Recherche",
+  "menu.audit": "Audit",
+  "menu.restrictions": "Restrictions",
+  "menu.reporting": "Rapports",
 
   /* 04.Error Page */
-  "layouts.error-title": "عفوًا ... يبدو أنه حدث خطأ!",
-  "layouts.error-code": "Error code",
-  "layouts.go-back-home": "الرجوع الى الصفحة الرئيسية",
+  "layouts.error-title": "Ooops... un erreur est survenue!",
+  "layouts.error-code": "Erreur de code",
+  "layouts.go-back-home": "Revenir vers ACCEUIL",
 
   /* 04.DataList : Users */
-  "user.Manage-Uses": "ادارة المستخدمين",
-  "user.Archived-Users": "المستخدمين المؤرشفة",
-  "user.Manage-Teams": "إدارة الفرق",
-  "user.Add-User": "إضافة المستخدمين",
-  "user.Edit-User": "تغيير المستخدم",
-  "user.role": "وظيفة",
-  "users.add-success-message": "تم حفظ المستخدم بنجاح!",
-  "users.deleted-success-message": "تم حذف المستخدم بنجاح!",
-  "users.enabled-success-message": "تم تفعيل المستخدم بنجاح!",
-  "users.error-authentification": "فشل تسجيل الدخول",
-  "users.confirm-delete-title": "التأكيد",
-  "users.confirm-delete": "هل أنت متأكد أنك تريد حذف المستخدم؟",
+  "user.Manage-Uses": "Gérer les utilisateurs",
+  "user.Archived-Users": "Utilisateur Archivé",
+  "user.Manage-Teams": "Gérer équipe ",
+  "user.Add-User": "Ajouter Utilisateur",
+  "user.Edit-User": "Modifier Utilisateur",
+  "user.role": "Rôle",
+  "users.add-success-message": "Utilisateur ajouté avec succès!",
+  "users.deleted-success-message": "Utilisateur supprimé avec succès!",
+  "users.enabled-success-message": "Utilsateur activé avec succès!",
+  "users.error-authentification": "Identification erroné!",
+  "users.confirm-delete-title": "Confirmation",
+  "users.confirm-delete": "Êtes vous sûr de vouloir supprimer cet utilisateur?",
 
   /* DataList : Teams */
-  "teams.Add-Teams": "Add Teams",
-  "teams.Edit-Team": "Edit Teams",
-  "teams.add-success-message": "Team saved successfully!",
-  "teams.deleted-success-message": "Team deleted successfully!",
-  "teams.confirm-delete": "Are you sure you want to delete the team ?",
-  "teams.error-gettings-teams": "Error getting teams",
+  "teams.Add-Teams": "Ajouter des équipes",
+  "teams.Edit-Team": "Modifier des équipes",
+  "teams.add-success-message": "Equipe ajouté avec succès!",
+  "teams.deleted-success-message": "Equipe supprimé avec succès!",
+  "teams.confirm-delete": "Êtes vous sûr de vouloir supprimer cette équipe ?",
+  "teams.error-gettings-teams": "Erreur à propos de l'équipe",
 
   /* DataList : restrictions */
-  "restrictions.Add-Restrictions": "Add Restrictions",
-  "restrictions.add-success-message": "Restriction saved successfully!",
-  "restrictions.deleted-success-message": "Restriction deleted successfully!",
-  "restrictions.confirm-delete":
-    "Are you sure you want to delete the Restriction ?",
+  "restrictions.Add-Restrictions": "Ajouter des  Restrictions",
+  "restrictions.add-success-message": "Restriction sauvegarde avec succes!",
+  "restrictions.deleted-success-message": "Restriction supprime avec succes!",
+  "restrictions.confirm-delete": "Etes vous sure de vouloir supprimer cette Restriction ?",
   "restrictions.error-gettings": "Error getting restrictions",
 
   /* DataList : projets */
-  "projets.Add-Projets": "Add Projets",
-  "projets.add-success-message": "Projet saved successfully!",
-  "projets.deleted-success-message": "Projet deleted successfully!",
-  "projets.confirm-delete": "Are you sure you want to delete the Projet ?",
+  "projets.Add-Projets": "Ajouter Projets",
+  "projets.add-success-message": "Projet sauvegarde avec succes!",
+  "projets.deleted-success-message": "Projet supprime avec succes!",
+  "projets.confirm-delete": "Etes vous sure de vouloire supprimer ce Projet ?",
   "projets.error-gettings": "Error getting projets",
 
   /* Documents */
@@ -134,6 +133,7 @@ module.exports = {
   "error.pwd-not-match": "Password not match",
   "errors.error-adding-user": "Error occurred please try again",
   "error.password-to-short": "Password too short",
+  "error.name-to-short": "The name of the project must be with 3 characters",
   "no-data-found": "No data Found !",
 
   /* Search */
@@ -164,14 +164,42 @@ module.exports = {
   "Show all action types": "Show all action types",
   "Show only passive actions": "Show only passive actions",
 
-  totalDocuments: "مجموع الوثائق",
-  totalEnglishTranslations: "مجموع الترجمات الإنجليزية",
-  totalImages: "مجموع الصور",
-  totalMetadatas: " مجموع البيانات الوصفية",
-  totalOcrs: "OCR مجموع",
-  totalVideos: "مجموع الفيديو",
+  totalDocuments: "Total Documents",
+  totalEnglishTranslations: "Total English Translations",
+  totalImages: "Total Images",
+  totalMetadatas: "Total Metadatas",
+  totalOcrs: "Total OCR",
+  totalVideos: "total Videos",
 
   "Records without metadata": "Records without metadata",
   "Search for documents box having no metadata for fields":
-    "Search for documents box having no metadata for fields"
+    "Search for documents box having no metadata for fields",
+
+  /** this part is made for datalist labes */
+  "menu.data-list": "Connetions List",
+  "pages.add-new": "New Connection",
+  "pages.orderby": "Order By ",
+  "pages.add-new-connection-title": "Add New Connection",
+  "pages.update-connection-title": "Update Connection",
+  "pages.host-name": "Host Name",
+  "pages.port": "Connection port",
+  "pages.connector": "Connector",
+  "pages.connection-name": "Connection Name",
+  "pages.ssl": "SSL",
+  "pages.cancel": "Cancel",
+  "pages.submit": "Save",
+  "pages.delete": "delete",
+  "pages.update": "update",
+  "input-groups.host.port": "Host &Port",
+
+  /** survey */
+  "survey.orderby": "base de donnees",
+  queries: "Requetes",
+  SQL: "SQL",
+
+  /** queryList  */
+  "pages.add-new-query-title": "ajouter une nouvelle requete",
+  "menu.query-list": "Liste des requetes",
+  "collapse.toggle": "Afficher les requetes",
+  "Query.add-new": "Qjouter une nouvelle requete"
 };
