@@ -34,11 +34,12 @@ const AddUserCmp = ({
   isLoadingAddingUser,
   msgError
 }) => {
+  roles = [{ id: 1, name: "admin" }, { id: 1, name: "user" }];
   return (
     <form onSubmit={handleSubmit}>
       <ModalHeader toggle={toggleModal}>
         <IntlMessages
-          id={initialValues.username ? "user.Edit-User" : "user.Add-User"}
+          id={initialValues.login ? "user.Edit-User" : "user.Add-User"}
         />
       </ModalHeader>
       <ModalBody className="pb-0">
@@ -60,7 +61,7 @@ const AddUserCmp = ({
         />
         <Field
           className="mt-4"
-          name="username"
+          name="login"
           component={ValidatedInput}
           type="text"
           label="Username"
@@ -101,15 +102,6 @@ const AddUserCmp = ({
           getOptionValue={i => i.id}
           options={roles}
         />
-        {errorAddingUser && (
-          <div className="d-block text-danger text-center">
-            {msgError ? (
-              msgError
-            ) : (
-              <IntlMessages id={"errors.error-adding-user"} />
-            )}
-          </div>
-        )}
       </ModalBody>
       <ModalFooter>
         <Button color="secondary" outline onClick={toggleModal}>

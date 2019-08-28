@@ -80,7 +80,6 @@ function* postUserSaga({ payload }) {
       yield put(getUsersData());
       if (success) success();
     } else {
-
       if (error) error(get(value, "data.message"));
     }
   } catch (err) {

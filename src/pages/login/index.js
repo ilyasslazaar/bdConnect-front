@@ -37,7 +37,7 @@ class LoginLayout extends Component {
         this._isMounted && this.setState({ isLoading: false });
       },
       () => {
-        this._isMounted && this.setState({ isLoading: false, showError: true });
+        this.setState({ isLoading: false, showError: true });
       }
     );
   };

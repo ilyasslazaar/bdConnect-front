@@ -172,42 +172,6 @@ class TopNav extends Component {
             <rect x="0.5" y="15.5" width="25" height="1" />
           </svg>
         </NavLink>
-        <div className="search">
-          <Autocomplete
-            name="searchKeyword"
-            wrapperStyle={{ width: "100%" }}
-            renderInput={props => {
-              return <input {...props} />;
-            }}
-            placeholder={messages["menu.search"]}
-            getItemValue={i => (i ? i.boxId + "/" + i.id : "")}
-            items={this.state.docsSearch}
-            onChange={({ target }) => {
-              this.onLoadDocsOptions(target.value);
-            }}
-            onSelect={val => {
-              this.props.history.push("/app/documents/list/box/" + val);
-              this.setState({ searchValue: "" });
-            }}
-            value={this.state.searchValue}
-            renderItem={(i, isHighlighted) => (
-              <div
-                key={i.id}
-                className={cs("w-100 d-block p-2 border-bottom", {
-                  "font-weight-bold": isHighlighted
-                })}
-              >
-                {i.box + "." + i.number}
-              </div>
-            )}
-          />
-          <span
-            className="search-icon"
-            onClick={e => this.handleSearchIconClick(e)}
-          >
-            <i className="simple-icon-magnifier" />
-          </span>
-        </div>
         <div className="d-inline-block">
           <UncontrolledDropdown className="ml-2">
             <DropdownToggle
