@@ -169,7 +169,6 @@ class TopNav extends Component {
             <rect x="0.5" y="15.5" width="25" height="1" />
           </svg>
         </NavLink>
-        
         <div className="d-inline-block">
           <UncontrolledDropdown className="ml-2">
             <DropdownToggle

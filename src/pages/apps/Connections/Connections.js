@@ -769,9 +769,7 @@ class DataListLayout extends Component {
                     </div>
                   </div>
                   <div className="float-md-right">
-                    <span className="text-muted text-small mr-1">{`${startIndex}-${endIndex} of ${
-                      this.state.totalItemCount
-                    } `}</span>
+                    <span className="text-muted text-small mr-1">{`${startIndex}-${endIndex} of ${this.state.totalItemCount} `}</span>
                     <UncontrolledDropdown className="d-inline-block">
                       <DropdownToggle caret color="outline-dark" size="xs">
                         {this.state.selectedPageSize}

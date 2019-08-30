@@ -177,7 +177,7 @@ module.exports = {
     "Search for documents box having no metadata for fields",
 
   /** this part is made for datalist labes */
-  "menu.data-list": "Connetions List",
+  "menu.data-list": "Connections List",
   "pages.add-new": "New Connection",
   "pages.orderby": "Order By ",
   "pages.add-new-connection-title": "Add New Connection",

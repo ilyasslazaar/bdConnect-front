@@ -119,7 +119,7 @@ class Users extends Component {
     if (this.state.selectedItems.length > 0) {
       if (isConfirmed) {
         const userIds = this.state.selectedItems.map(
-          index => this.props.usersData.result[index].id
+          index => this.props.usersData.content[index].id
         );
         this.props.deleteUser(userIds, () => {
           this.createNotif("users.deleted-success-message");
@@ -132,7 +132,7 @@ class Users extends Component {
   };
 
   onEditUser = index => {
-    this.props.editUserOnModal(this.props.usersData.result[index]);
+    this.props.editUserOnModal(this.props.usersData.content[index]);
     this.toggleModal();
   };
   onAddUser = () => {
@@ -195,6 +195,7 @@ class Users extends Component {
 
   render() {
     const { usersFilter, usersData, isArchivedUsers } = this.props;
+
     return (
       <Fragment>
         <DataListContainer
@@ -202,7 +203,7 @@ class Users extends Component {
           addNewText="user.Add-User"
           hideButtons={isArchivedUsers}
           onAddClick={this.onAddUser}
-          dataLength={usersData.total || 0}
+          dataLength={usersData.totalElements ? usersData.totalElements : 0}
           pageSize={usersFilter.pageSize}
           changePageSize={this.changePageSize}
           onChangeOrderBy={this.changeOrderBy}
@@ -210,21 +211,19 @@ class Users extends Component {
           onChangePage={this.onChangePage}
           currentPage={usersFilter.page}
           isAllSelected={
-            usersData.result.length === this.state.selectedItems.length
+            usersData.content &&
+            usersData.content.length === this.state.selectedItems.length
           }
           onAllSelectedClick={() => this.handleChangeSelectAll(true)}
           onDeleteSelected={() => this.onDeleteUsers()}
         >
           {this.conditionRender()
             ? this.conditionRender()
-            : usersData.result.map((product, index) => {
+            : usersData.content &&
+              usersData.content.map((product, index) => {
                 return (
                   <Colxx xxs="12" key={index} className="mb-3">
-                    <ContextMenuTrigger
-                      id="menu_id"
-                      data={index}
-                      collect={p => ({ data: p.data })}
-                    >
+                    <ContextMenuTrigger id="menu_id" data={index}>
                       <Card
                         onClick={e => this.handleCheckChange(e, index)}
                         className={classnames("d-flex flex-row", {
@@ -234,10 +233,10 @@ class Users extends Component {
                         <div className="pl-2 d-flex flex-grow-1 min-width-zero">
                           <div className="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
                             <p className="list-item-heading mb-1 truncate">
-                              {product.name}
+                              {product.firstName + " " + product.lastName}
                             </p>
                             <p className="mb-1 text-muted text-small w-15 w-sm-100">
-                              {product.username}
+                              {product.login}
                             </p>
                             <p className="mb-1 text-muted text-small w-15 w-sm-100">
                               {product.email}
