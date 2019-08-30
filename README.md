@@ -115,6 +115,17 @@ User queries list:
 Queries result:
 ![UserQueryResult](https://user-images.githubusercontent.com/45606275/64029355-4b1a4580-cb3c-11e9-8ccb-3cd4ec8fee45.PNG)
  
+ ### Libraries
+ 
+-Redux
+-Saga
+-MaterialUI
+-Bootstrap
+-AceEditor 
+-ReactStrap
+-ReactSelect
+-Axios
+
 
 
 
