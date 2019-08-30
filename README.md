@@ -67,68 +67,10 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
 
-##App functionalities
+### App Functionalitites
+
 First of all, we have to login as an admin or a user
-![AuthenticationImage]("Authentication.png")
+![AuthenticationImage]("images/Authentication.png")
   
 This is the home page it appears after the authentication
- ![HomePageImage]("homepage.png")
-
- Admin role:
--The admin can add a new connection:
-  
-
--He can update or delete connection:
- 
- 
-
--he can add query:
-  
-
-
- 
--he can also edit the query name:
- 
--the admin can also update the query and save it as new:
- 
---he can also add user and assign each connection and each query to each user: 
- 
-
-
-
-
-
-
-
-
-
-
-
--	can edit or delete user:
-
- 
-
- 
-
-
-
-
-
-
-
-User role:
- 
-For the user he has the right to choose a connection that the admin assigned to him and see queries affected to that connection:
-User connection list:
- 
-
-User queries list:
- 
-
-
-
-Queries result:
- 
-
-
-
+ ![HomePageImage]("images/HomePage.png")
