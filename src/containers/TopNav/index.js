@@ -6,7 +6,7 @@ import {
   DropdownToggle,
   DropdownMenu
 } from "reactstrap";
-import Autocomplete from "react-autocomplete";
+
 import { NavLink } from "react-router-dom";
 import { connect } from "react-redux";
 import {
@@ -15,7 +15,6 @@ import {
   changeLocale
 } from "redux/actions";
 import { injectIntl } from "react-intl";
-import cs from "classnames";
 
 import { menuHiddenBreakpoint, localeOptions } from "constants/defaultValues";
 import { logoutApi } from "redux/users/apis";
@@ -130,7 +129,6 @@ class TopNav extends Component {
 
   render() {
     const { containerClassnames, menuClickCount } = this.props;
-    const { messages } = this.props.intl;
 
     return (
       <Nav className="navbar fixed-top">

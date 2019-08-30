@@ -27,9 +27,7 @@ export const loginApi = user => {
           instance.defaults.headers.common["Authorization"] = "Bearer " + jwt;
         }
       })
-      .catch(e => {
-        const mute = e;
-      });
+      .catch(e => {});
   }
 
   return result;

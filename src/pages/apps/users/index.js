@@ -96,12 +96,12 @@ class Users extends Component {
 
   handleChangeSelectAll(isToggle) {
     let { selectedItems } = this.state;
-    if (selectedItems.length >= this.props.usersData.result.length) {
+    if (selectedItems.length >= this.props.usersData.content.length) {
       if (isToggle) {
         selectedItems = [];
       }
     } else {
-      selectedItems = range(this.props.usersData.result.length);
+      selectedItems = range(this.props.usersData.content.length);
     }
     this.setState({ selectedItems });
     return false;
