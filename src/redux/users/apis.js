@@ -53,7 +53,7 @@ export const getAutoCompleteUsers = text =>
   });
 
 export const postUser = user => {
-  //console.log(user);
+  console.log(user);
 
   const userToAdd = {
     ...user,
