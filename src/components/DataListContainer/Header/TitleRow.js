@@ -33,6 +33,8 @@ export class TitleRow extends Component {
       onAllSelectedClick,
       onDeleteSelected
     } = this.props;
+
+    
     return (
       <div className="mb-2">
         {title && (
@@ -61,7 +63,7 @@ export class TitleRow extends Component {
                       className="custom-control-input custom-control-input-dark"
                       type="checkbox"
                       id="checkAll"
-                      checked={isAllSelected}
+                      checked={isAllSelected === undefined ? false:isAllSelected}
                       onClick={onAllSelectedClick}
                       onChange={() => {}}
                     />

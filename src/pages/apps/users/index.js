@@ -5,7 +5,7 @@ import classnames from "classnames";
 import IntlMessages from "util/IntlMessages";
 import { connect } from "react-redux";
 import { range } from "lodash";
-import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import {  ContextMenuTrigger } from "react-contextmenu";
 
 import { Colxx } from "components/CustomBootstrap";
 import mouseTrap from "react-mousetrap";
@@ -132,8 +132,21 @@ class Users extends Component {
   };
 
   onEditUser = index => {
+    if(this.state.selectedItems.length>1){
+      NotificationManager.error(
+        this.props.intl.messages["user.edit.error"],
+        "",
+        3000,
+        null,
+        null,
+        "filled"
+      );
+   
+    }else{
     this.props.editUserOnModal(this.props.usersData.content[index]);
     this.toggleModal();
+    }
+    
   };
   onAddUser = () => {
     this.props.editUserOnModal({});
@@ -170,8 +183,10 @@ class Users extends Component {
     }
   };
   onContextMenu = ({ detail }) => {
+    if(detail.data !==null){
     const selectedItems = [detail.data.data];
     this.setState({ selectedItems });
+    }
   };
 
   onChangePage = page => {
@@ -220,7 +235,7 @@ class Users extends Component {
           {this.conditionRender()
             ? this.conditionRender()
             : usersData.content &&
-              usersData.content.map((product, index) => {
+              usersData.content.map((user, index) => {
                 return (
                   <Colxx xxs="12" key={index} className="mb-3">
                     <ContextMenuTrigger id="menu_id" data={index}>
@@ -233,13 +248,13 @@ class Users extends Component {
                         <div className="pl-2 d-flex flex-grow-1 min-width-zero">
                           <div className="card-body align-self-center d-flex flex-column flex-lg-row justify-content-between min-width-zero align-items-lg-center">
                             <p className="list-item-heading mb-1 truncate">
-                              {product.firstName + " " + product.lastName}
+                              {user.firstName + " " + user.lastName}
                             </p>
                             <p className="mb-1 text-muted text-small w-15 w-sm-100">
-                              {product.login}
+                              {user.login}
                             </p>
                             <p className="mb-1 text-muted text-small w-15 w-sm-100">
-                              {product.email}
+                              {user.email}
                             </p>
                           </div>
                           {!isArchivedUsers && (
@@ -330,34 +345,7 @@ class Users extends Component {
           />
         </Modal>
 
-        <ContextMenu id="menu_id" onShow={this.onContextMenu}>
-          {!isArchivedUsers && (
-            <Fragment>
-              <MenuItem onClick={() => this.onDeleteUsers()}>
-                <i className="simple-icon-trash" />
-                <span>
-                  <IntlMessages id="Delete" />
-                </span>
-              </MenuItem>
-              <MenuItem
-                onClick={() => this.onEditUser(this.state.selectedItems[0])}
-              >
-                <i className="simple-icon-pencil" />
-                <span>
-                  <IntlMessages id="Edit" />
-                </span>
-              </MenuItem>
-            </Fragment>
-          )}
-          {isArchivedUsers && (
-            <MenuItem onClick={() => this.onEnableUser()}>
-              <i className="simple-icon-check" />
-              <span>
-                <IntlMessages id="Enable" />
-              </span>
-            </MenuItem>
-          )}
-        </ContextMenu>
+      
       </Fragment>
     );
   }
