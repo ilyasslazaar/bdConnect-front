@@ -24,6 +24,8 @@ import { AddUser } from "./addUser";
 import { NotificationManager } from "components/ReactNotifications";
 import { ConfirmationModal } from "../../../components/ConfirmationModal";
 
+
+
 class Users extends Component {
   constructor(props) {
     super(props);
@@ -34,6 +36,7 @@ class Users extends Component {
       modalOpen: false
     };
   }
+
   componentWillMount() {
     this.props.getUsersData(this.props.isArchivedUsers);
     if (!this.props.roles.length) {

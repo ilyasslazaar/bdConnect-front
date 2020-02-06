@@ -593,6 +593,7 @@ class QueryList extends Component {
                       </ModalFooter>
                     </AvForm>
                   </Modal>
+                  {adminRole()&&
                   <ButtonDropdown
                     isOpen={this.state.dropdownSplitOpen}
                     toggle={this.toggleSplit}
@@ -640,7 +641,7 @@ class QueryList extends Component {
                         <IntlMessages id="pages.delete" />
                       </DropdownItem>
                     </DropdownMenu>
-                  </ButtonDropdown>
+                  </ButtonDropdown>}
                 </div>
               </div>
 
@@ -784,7 +785,7 @@ class QueryList extends Component {
                             </Badge>
                           </div>
                         </div>
-                        <div className="custom-control custom-checkbox pl-1 align-self-center pr-4">
+                        {adminRole() &&<div className="custom-control custom-checkbox pl-1 align-self-center pr-4">
                           <CustomInput
                             className="itemCheck mb-0"
                             type="checkbox"
@@ -795,7 +796,7 @@ class QueryList extends Component {
                             onChange={() => {}}
                             label=""
                           />
-                        </div>
+                        </div>}
                       </div>
                     </Card>
                   </ContextMenuTrigger>

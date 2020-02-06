@@ -62,6 +62,7 @@ class DataListLayout extends Component {
     this.toggleModal = this.toggleModal.bind(this);
     this.getIndex = this.getIndex.bind(this);
     this.onContextMenuClick = this.onContextMenuClick.bind(this);
+    
 
     this.state = {
       users: [],
@@ -200,7 +201,7 @@ class DataListLayout extends Component {
       };
       instance
         .put(
-          servicePath + "/api/connexions/" + this.state.connector,
+          servicePath + "/api/connexions/" + this.state.connector+"?u="+this.state.selectedUser,
           updateForm
         )
         .then(() => {
@@ -323,7 +324,6 @@ class DataListLayout extends Component {
       });
     }
     document.activeElement.blur();
-    //console.log(this.state);
   }
 
   getIndex(value, arr, prop) {
@@ -385,28 +385,7 @@ class DataListLayout extends Component {
 
   onContextMenuClick = (e, data, target) => {
     if (this.state.selectedItems.length > 0) {
-      confirmAlert({
-        message: "Are you sure you want to delete this connection ",
-        buttons: [
-          {
-            label: "Yes",
-            onClick: () => {
-              instance
-                .post(
-                  servicePath + "/api/connexions/delete",
-                  this.state.selectedItems
-                )
-                .then(() => {
-                  this.dataListRender();
-                });
-            }
-          },
-          {
-            label: "No",
-            onClick: () => {}
-          }
-        ]
-      });
+      this.deleteConnection(this.state.selectedItems);
     } else {
       NotificationManager.error(
         "please select  Connection(s) to delete",
@@ -421,43 +400,74 @@ class DataListLayout extends Component {
     }
   };
 
+    deleteConnection = (connectionIds)=> {
+        confirmAlert({
+          message: "Are you sure you want to delete this connection ",
+          buttons: [
+            {
+              label: "Yes",
+              onClick: () => {
+                instance
+                  .post(
+                    servicePath + "/api/connexions/delete",
+                    connectionIds
+                  )
+                  .then(() => {
+                    this.dataListRender();
+                  });
+              }
+            },
+            {
+              label: "No",
+              onClick: () => {}
+            }
+          ]
+        });
+    };
+
+  updateConnection = (connectionId)=>{
+    instance
+    .get(servicePath + "/api/connexions/" + connectionId)
+    .then(response => {
+      this.setState({
+        togleTitle: false,
+        connectionToUpdate: response.data.id,
+        connector: response.data.connector.id,
+        modalOpen: true,
+        connectionForm: {
+          ...this.state.connectionForm,
+          currentDatabase: response.data.currentDatabase,
+          hostname: response.data.hostname,
+          name: response.data.name,
+          password: response.data.password,
+          port: response.data.port,
+          queries: response.data.queries,
+          ssl: response.data.ssl,
+          user: response.data.user
+        }
+      });
+    });
+
+  if (this.state.selectedItems.length > 1) {
+    NotificationManager.warning(
+      "Can't update  multiple connections last one is selected !",
+      "update Warning",
+      3000,
+      null,
+      null,
+      ""
+    );
+  }
+};
+
+
+
   OnUpdateClick = e => {
     const selectedConnectionId = this.state.selectedItems[
       this.state.selectedItems.length - 1
     ];
-    instance
-      .get(servicePath + "/api/connexions/" + selectedConnectionId)
-      .then(response => {
-        this.setState({
-          togleTitle: false,
-          connectionToUpdate: response.data.id,
-          connector: response.data.connector.id,
-          modalOpen: true,
-          connectionForm: {
-            ...this.state.connectionForm,
-            currentDatabase: response.data.currentDatabase,
-            hostname: response.data.hostname,
-            name: response.data.name,
-            password: response.data.password,
-            port: response.data.port,
-            queries: response.data.queries,
-            ssl: response.data.ssl,
-            user: response.data.user
-          }
-        });
-      });
-
-    if (this.state.selectedItems.length > 1) {
-      NotificationManager.warning(
-        "Can't update  multiple connections last one is selected !",
-        "update Warning",
-        3000,
-        null,
-        null,
-        ""
-      );
-    }
-  };
+    this.updateConnection(selectedConnectionId);
+  }
 
   onContextMenu = (e, data) => {
     const clickedProductId = data.data;
@@ -648,7 +658,7 @@ class DataListLayout extends Component {
                       </ModalFooter>
                     </AvForm>
                   </Modal>
-                  <ButtonDropdown
+                  {adminRole()&&<ButtonDropdown
                     isOpen={this.state.dropdownSplitOpen}
                     toggle={this.toggleSplit}
                   >
@@ -695,7 +705,7 @@ class DataListLayout extends Component {
                         <IntlMessages id="pages.delete" />
                       </DropdownItem>
                     </DropdownMenu>
-                  </ButtonDropdown>
+                  </ButtonDropdown>}
                 </div>
               </div>
 
@@ -841,7 +851,37 @@ class DataListLayout extends Component {
                             </Badge>
                           </div>
                         </div>
-                        <div className="custom-control custom-checkbox pl-1 align-self-center pr-4">
+                        {adminRole() && ( <Fragment>
+                              <div className="align-self-center pr-3">
+                                <a
+                                  href=" "
+                                  onClick={e => {
+                                    e.preventDefault();
+                                   this.updateConnection(connection.id);
+                                  }}
+                                >
+                                  <i className="simple-icon-pencil" />
+                                </a>
+                              </div>
+                              <div className="align-self-center pr-4">
+                                <a
+                                  href=" "
+                                  onClick={
+                                    e => {
+                                      e.preventDefault();
+                                      this.deleteConnection([connection.id])
+                                    }
+                                  }
+                                  data={{ action: "delete" }}
+                                >
+                                  <i className="simple-icon-trash" />
+                                </a>
+                              </div>
+                            </Fragment>
+
+                           )}
+                           
+                        {adminRole()&& (<div className="custom-control custom-checkbox pl-1 align-self-center pr-4">
                           <CustomInput
                             className="itemCheck mb-0"
                             type="checkbox"
@@ -852,7 +892,7 @@ class DataListLayout extends Component {
                             onChange={() => {}}
                             label=""
                           />
-                        </div>
+                        </div>)}
                       </div>
                     </Card>
                   </ContextMenuTrigger>
