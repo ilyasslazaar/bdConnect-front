@@ -14,7 +14,7 @@
     "caniuse-lite": "^1.0.30000989",
     "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
-    "codemirror": "^5.48.2",
+    "codemirror": "^5.58.2",
     "diff-match-patch": "^1.0.4",
     "lodash": "^4.17.11",
     "mui-datatables": "^2.0.0-beta.59",
