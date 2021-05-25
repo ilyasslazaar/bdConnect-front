@@ -10,7 +10,7 @@
     "availity-reactstrap-validation": "^2.6.0",
     "axios": "^0.18.0",
     "brace": "^0.11.1",
-    "browserslist": "^4.6.6",
+    "browserslist": "^4.16.5",
     "caniuse-lite": "^1.0.30000989",
     "chart.js": "^2.8.0",
     "classnames": "^2.2.6",
